@@ -9,7 +9,6 @@
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
-
 # Package Files #
 *.jar
 *.war
@@ -19,7 +18,6 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
 # General
@@ -32,7 +30,6 @@ Icon
 
 
 # Thumbnails
-._*
 
 # Files that might appear in the root of a volume
 .DocumentRevisions-V100
@@ -52,3 +49,7 @@ Temporary Items
 
 # file: ~/.gitignore_global
 .idea
+
+.txt
+.jar
+.jar.original
