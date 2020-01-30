@@ -53,3 +53,7 @@ Temporary Items
 .txt
 .jar
 .jar.original
+
+*.iml
+
+**/*.iml
