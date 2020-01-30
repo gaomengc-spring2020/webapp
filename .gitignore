@@ -50,8 +50,8 @@ Temporary Items
 # file: ~/.gitignore_global
 .idea
 
-.txt
-.jar
-.jar.original
+*.txt
 
-.iml
+*.jar.original
+
+*.iml
