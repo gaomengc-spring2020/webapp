@@ -8,15 +8,15 @@ import java.util.List;
 @Component
 public interface UserDAO {
 
-    public List<User> listAllUser();
+    List<User> listAllUser();
 
-    public User findByEmail(String theEmail);
+    User findByEmail(String theEmail);
 
-    public void createUser(User theUser);
+    void createUser(User theUser);
 
-    public void updateUser(User theUser);
+    void updateUser(User theUser);
 
-    public void deleteUser(String theEmail);
+    void deleteUser(String theEmail);
 
-    public String login(String username, String password);
+    String login(String username, String password);
 }

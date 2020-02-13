@@ -1,6 +1,7 @@
 package com.mengchen.webapp.dao;
 
 import com.mengchen.webapp.entity.Bill;
+import com.mengchen.webapp.entity.File;
 import com.mengchen.webapp.entity.User;
 import org.springframework.stereotype.Component;
 
@@ -23,5 +24,7 @@ public interface BillDAO {
 
     // PUT /v1/bill/{id}
     void updateBill(Bill theBill);
+
+    Bill uploadAttachment(Bill theBill);
 
 }
