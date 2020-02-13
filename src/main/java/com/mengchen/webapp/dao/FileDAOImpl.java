@@ -16,11 +16,14 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.logging.Logger;
 
 @Repository
@@ -74,6 +77,10 @@ public class FileDAOImpl implements FileDAO{
         theFile.setFileName(fileName);
         theFile.setSize(file.getSize());
         theFile.setUrl(uploadPath.toString());
+        theFile.setOriginName(file.getOriginalFilename());
+        theFile.setContentType(file.getContentType());
+        theFile.setHash(getMD5(file));
+        theFile.setOwnerEmail(theBill.getOwner_id());
 
         theBill.setAttachment(theFile);
 
@@ -119,5 +126,19 @@ public class FileDAOImpl implements FileDAO{
         fileRepository.deleteById(theFileId);
         logger.info(">>>>>> FileDAO: deleteFile: " + "deleted");
 
+    }
+
+
+    private String getMD5(MultipartFile file){
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(file.getBytes());
+            byte[] digest = md.digest();
+            return DatatypeConverter
+                    .printHexBinary(digest).toUpperCase();
+        } catch (NoSuchAlgorithmException | IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
