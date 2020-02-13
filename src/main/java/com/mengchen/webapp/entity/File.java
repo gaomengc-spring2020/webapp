@@ -33,6 +33,18 @@ public class File {
     @Column(name = "size")
     private long size;
 
+    @Column(name = "md5_hash")
+    private String hash;
+
+    @Column(name = "origin_name")
+    private String originName;
+
+    @Column(name = "content_type")
+    private String contentType;
+
+    @Column(name = "owner_id")
+    private String ownerEmail;
+
     @JsonBackReference
     @OneToOne(mappedBy = "attachment")
     @Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
@@ -87,6 +99,38 @@ public class File {
         this.bill = bill;
     }
 
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    public String getOriginName() {
+        return originName;
+    }
+
+    public void setOriginName(String originName) {
+        this.originName = originName;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public String getOwnerEmail() {
+        return ownerEmail;
+    }
+
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
+    }
+
     @PrePersist
     public void prePersist() {
         String pattern = "MM-dd-yyyy";
@@ -96,11 +140,17 @@ public class File {
 
     @Override
     public String toString() {
-        return "Files{" +
+        return "File{" +
                 "id='" + id + '\'' +
                 ", fileName='" + fileName + '\'' +
                 ", url='" + url + '\'' +
-                ", uploadDate=" + uploadDate +
+                ", uploadDate='" + uploadDate + '\'' +
+                ", size=" + size +
+                ", hash='" + hash + '\'' +
+                ", originName='" + originName + '\'' +
+                ", contentType='" + contentType + '\'' +
+                ", ownerEmail='" + ownerEmail + '\'' +
+                ", bill=" + bill +
                 '}';
     }
 }

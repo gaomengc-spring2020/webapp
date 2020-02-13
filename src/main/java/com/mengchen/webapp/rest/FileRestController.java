@@ -17,6 +17,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.xml.bind.DatatypeConverter;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -77,6 +81,7 @@ public class FileRestController {
         theFile.setFileName(file.getName());
         theFile.setUrl("fileUri");
 
+
         fileService.storeFile(file,theBill);
 
         logger.info(">>>> POST file: (theBill) " + ConvertJSON.ConvertToJSON(theBill));
@@ -133,4 +138,5 @@ public class FileRestController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
 
     }
+
 }
