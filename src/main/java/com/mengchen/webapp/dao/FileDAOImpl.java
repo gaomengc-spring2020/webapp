@@ -21,6 +21,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 @Repository
 public class FileDAOImpl implements FileDAO{
@@ -30,6 +31,9 @@ public class FileDAOImpl implements FileDAO{
 
     @Autowired
     BillRepository billRepository;
+
+    private org.jboss.logging.Logger logger = org.jboss.logging.Logger.getLogger(org.jboss.logging.Logger.class);
+
 
 
     private EntityManager entityManager;
@@ -111,7 +115,9 @@ public class FileDAOImpl implements FileDAO{
             ex.printStackTrace();
         }
 
+
         fileRepository.deleteById(theFileId);
+        logger.info(">>>>>> FileDAO: deleteFile: " + "deleted");
 
     }
 }
