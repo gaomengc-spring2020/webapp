@@ -17,6 +17,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Validated
 @RestController
 @RequestMapping("/v1/bill")
@@ -26,6 +30,7 @@ public class FileRestController {
     FileService fileService;
     UserService userService;
     private static final Logger logger = LoggerFactory.getLogger(Logger.class);
+    private static final String[] check = {"image/png","application/pdf","image/jpg", "image/jpeg"};
 
     @Autowired
     FileRestController(BillService billService, FileService fileService, UserService userService){
@@ -52,10 +57,20 @@ public class FileRestController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("There is no such entity.");
         }
 
+        String fileType = file.getContentType();
+        if(!Arrays.asList(check).contains(fileType)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You can only upload pdf, png, jpg or jpeg.");
+        }
+        logger.info(">>>>>> fileType: " + fileType);
+
         Bill theBill = billService.findBill(bill_id);
 
         if(!(theBill.getAttachment() == null)){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sry, Only one file per bill.");
+            theBill = billService.findBill(bill_id);
+            File theFile = theBill.getAttachment();
+            theBill.setAttachment(null);
+            billService.updateBill(theBill);
+            fileService.deleteFile(theFile.getId());
         }
 
         File theFile = new File();
@@ -65,7 +80,7 @@ public class FileRestController {
         fileService.storeFile(file,theBill);
 
         logger.info(">>>> POST file: (theBill) " + ConvertJSON.ConvertToJSON(theBill));
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(ConvertJSON.ConvertToJSON(theBill));
+        return ResponseEntity.status(HttpStatus.CREATED).body( ConvertJSON.ConvertToJSON(theBill));
     }
 
     @GetMapping("{bill_id}/file/{file_id}")
@@ -81,12 +96,12 @@ public class FileRestController {
             }
         }catch (NullPointerException ex){
             ex.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sry, There is no such Entity.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sry, There is no such Entity.");
         }
 
         File theFile = fileService.findFile(file_id);
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(ConvertJSON.ConvertToJSON(theFile));
+        return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theFile));
     }
 
     @DeleteMapping("{bill_id}/file/{file_id}")
@@ -102,7 +117,7 @@ public class FileRestController {
             }
         }catch (NullPointerException ex){
             ex.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sry, There is no such Entity.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sry, There is no such Entity.");
         }
 
 ////
@@ -115,7 +130,7 @@ public class FileRestController {
 
 
 
-        return ResponseEntity.status(HttpStatus.OK).body("");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
 
     }
 }

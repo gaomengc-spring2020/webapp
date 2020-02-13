@@ -142,7 +142,8 @@ public class BillRestController {
         }
 
         if(theBill.getOwner_id() != null || theBill.getBill_id() != null
-            || theBill.getCreated_ts() != null || theBill.getUpdated_ts() != null){
+            || theBill.getCreated_ts() != null || theBill.getUpdated_ts() != null
+        || theBill.getAttachment() != null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You input some field that are not allowed to be modified.");
         }
 
