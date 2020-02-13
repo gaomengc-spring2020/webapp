@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @DynamicUpdate
 @SelectBeforeUpdate
 @EntityListeners(AuditingEntityListener.class)
-@Table(name= "users")
+@Table(name= "user")
 @JsonFilter("UserEntity")
 public class User {
 
@@ -36,10 +36,13 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "username", unique = true)
+    @Column(name = "email", unique = true)
     @Email(message = "Sry, You must enter right email address to be your username!")
     @Valid
     private String email;
+//
+//    @Column(name = "username")
+//    private String username;
 
     @ValidPassword
     @Column(name = "password")

@@ -2,17 +2,28 @@ package com.mengchen.webapp.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mengchen.webapp.entity.Bill;
+import com.mengchen.webapp.entity.File;
 import com.mengchen.webapp.entity.User;
 import com.mengchen.webapp.security.SecurityUtils;
 import com.mengchen.webapp.service.BillService;
 import com.mengchen.webapp.service.UserService;
 import com.mengchen.webapp.utils.ConvertJSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 @Validated
@@ -23,6 +34,7 @@ public class BillRestController {
     private BillService billService;
     private UserService userService;
 
+
     @Autowired
     public BillRestController(BillService billService, UserService userService){
         this.billService = billService;
@@ -31,8 +43,8 @@ public class BillRestController {
 
     @GetMapping("/bills")
     @ResponseBody
-    public ResponseEntity<String> getBills(@RequestHeader (name="Authorization") String token){
-        User theUser = userService.findByEmail(SecurityUtils.getUserEmailFromToken(token));
+    public ResponseEntity<String> getBills(Authentication auth){
+        User theUser = userService.findByEmail(auth.getName());
         List<Bill> theBills = billService.findAllBills(theUser);
         try{
             return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theBills));
@@ -43,7 +55,7 @@ public class BillRestController {
 
     @PostMapping("/bill")
     @ResponseBody
-    public ResponseEntity<String> createBill(@RequestHeader (name="Authorization") String token,
+    public ResponseEntity<String> createBill(Authentication auth,
                                              @RequestBody Bill theBill){
 
         if(theBill.getBill_id()!= null
@@ -53,7 +65,7 @@ public class BillRestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You input some field that are not allowed to be modified.");
         }
 
-        theBill.setOwner_id(SecurityUtils.getUserIdFromToken(token));
+        theBill.setOwner_id(userService.findByEmail(auth.getName()).getId());
 
         billService.createBill(theBill);
 
@@ -65,7 +77,7 @@ public class BillRestController {
     }
 
     @DeleteMapping("bill/{bill_id}")
-    public ResponseEntity<String> deleteBill(@RequestHeader (name="Authorization") String token,
+    public ResponseEntity<String> deleteBill(Authentication auth,
                                              @PathVariable String bill_id)  {
 
 
@@ -74,7 +86,7 @@ public class BillRestController {
         if(theBill == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no such bill");
 
-        String userId = SecurityUtils.getUserIdFromToken(token);
+        String userId = userService.findByEmail(auth.getName()).getId();
 
         if(!theBill.getOwner_id().equals(userId)){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sorry you only delete bills belongs to you");
@@ -93,7 +105,7 @@ public class BillRestController {
     }
 
     @GetMapping("/bill/{bill_id}")
-    public ResponseEntity<String> getBill(@RequestHeader (name="Authorization") String token,
+    public ResponseEntity<String> getBill(Authentication auth,
                                           @PathVariable String bill_id){
         Bill theBill = billService.findBill(bill_id);
 
@@ -101,7 +113,7 @@ public class BillRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no such bill");
 
 
-        String userId = SecurityUtils.getUserIdFromToken(token);
+        String userId = userService.findByEmail(auth.getName()).getId();
 
         if(!theBill.getOwner_id().equals(userId)){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sorry you can only get bills belongs to you");
@@ -117,7 +129,7 @@ public class BillRestController {
 
     @PutMapping("/bill/{bill_id}")
     @ResponseBody
-    public ResponseEntity<String> updateBill(@RequestHeader (name="Authorization") String token,
+    public ResponseEntity<String> updateBill(Authentication auth,
                                            @PathVariable String bill_id,
                                              @RequestBody Bill theBill){
 
@@ -125,13 +137,9 @@ public class BillRestController {
         if(checkBill == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no such Bill id");
         }
-        if(!checkBill.getOwner_id().equals(SecurityUtils.getUserIdFromToken(token))){
+        if(!checkBill.getOwner_id().equals(userService.findByEmail(auth.getName()).getId())){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sry You cannot update other's bills' info.");
         }
-
-//        if(!bill_id.equals(SecurityUtils.getUserIdFromToken(token))){
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sorry you can only update bills belongs to you");
-//        }
 
         if(theBill.getOwner_id() != null || theBill.getBill_id() != null
             || theBill.getCreated_ts() != null || theBill.getUpdated_ts() != null){
@@ -159,6 +167,7 @@ public class BillRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(je.getMessage());
         }
     }
+
 
 
 }

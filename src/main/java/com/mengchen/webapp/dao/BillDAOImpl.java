@@ -1,19 +1,37 @@
 package com.mengchen.webapp.dao;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mengchen.webapp.entity.Bill;
+import com.mengchen.webapp.entity.File;
 import com.mengchen.webapp.entity.User;
+import com.mengchen.webapp.properties.FileStorageProperties;
+import com.mengchen.webapp.repository.BillRepository;
+import com.mengchen.webapp.utils.ConvertJSON;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.jboss.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.FileSystemUtils;
 
 import javax.persistence.EntityManager;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Repository
 public class BillDAOImpl implements BillDAO{
 
     private EntityManager entityManager;
+
+    @Autowired
+    FileStorageProperties fileStorageProperties;
+
+    @Autowired
+    BillRepository billRepository;
+
+    private Logger logger = Logger.getLogger(Logger.class);
 
     @Autowired
     public BillDAOImpl(EntityManager entityManager){
@@ -54,14 +72,22 @@ public class BillDAOImpl implements BillDAO{
     // DELETE /v1/bill/{id}
     @Override
     public void deleteBill(String billID){
-        Session currentSession = entityManager.unwrap(Session.class);
+//        Session currentSession = entityManager.unwrap(Session.class);
+//
+//        Query theQuery =
+//                currentSession.createQuery("delete from Bill where bill_id=:billID");
+//        theQuery.setParameter("billID", billID);
+//
+        try{
+            Path filePath = Paths.get(fileStorageProperties.getLocation() + "/" + billID);
+            FileSystemUtils.deleteRecursively(filePath);
 
-        Query theQuery =
-                currentSession.createQuery("delete from Bill where bill_id=:billID");
-        theQuery.setParameter("billID", billID);
+        }catch (NullPointerException | IOException ex){
+            ex.printStackTrace();
+        }
 
-        theQuery.executeUpdate();
-
+        billRepository.deleteById(billID);
+//        theQuery.executeUpdate();
     }
 
     // GET /v1/bill/{id}
@@ -77,6 +103,12 @@ public class BillDAOImpl implements BillDAO{
         Bill theBill = theQuery.uniqueResultOptional().orElse(null);
         if(theBill == null ) return null;
 
+        try {
+            Logger.getLogger(logger.getClass()).info(">>>>>> BillDAO - findBill: " + ConvertJSON.ConvertToJSON(theBill));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
 //        currentSession.evict(theBill);
         return theBill;
     }
@@ -91,5 +123,18 @@ public class BillDAOImpl implements BillDAO{
 
     }
 
+    @Override
+    public Bill uploadAttachment(Bill theBill) {
+        Session currentSession = entityManager.unwrap(Session.class);
+
+        currentSession.update(theBill);
+
+        try {
+            logger.info(">>>>>> billDAO uploadFile: " + ConvertJSON.ConvertToJSON(findBill(theBill.getBill_id())));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return findBill(theBill.getBill_id());
+    }
 
 }

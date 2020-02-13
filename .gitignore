@@ -10,6 +10,7 @@ cmake-build-*/
 out/
 
 target/
+resources/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/

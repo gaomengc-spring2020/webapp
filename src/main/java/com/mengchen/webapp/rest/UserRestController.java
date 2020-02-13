@@ -8,11 +8,13 @@ import com.mengchen.webapp.utils.ResponseFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Validated
 @RestController
@@ -21,27 +23,30 @@ public class UserRestController {
 
     private UserService userService;
 
+    private Logger logger = Logger.getLogger(getClass().getName());
+
     @Autowired
     public UserRestController(UserService theUserService){
         this.userService = theUserService;
     }
 
-    @GetMapping("/users")
+    @GetMapping(value = "/users", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<String> getUsers() throws JsonProcessingException{
+    public ResponseEntity<String> getUsers() {
 
         List<User> listUser = userService.listAllUser();
 
-        return ResponseEntity.status(HttpStatus.OK).body(filterPassword(listUser));
+        return ResponseEntity.status(HttpStatus.OK).body(listUser.toString());
     }
 
     // add mapping for GET /users/{email}
 
     @GetMapping("/user/self")
     @ResponseBody
-    public ResponseEntity<String> getUser( @RequestHeader (name="Authorization") String token) throws JsonProcessingException{
+    public ResponseEntity<String> getUser( Authentication auth) throws JsonProcessingException{
 
-        User user = userService.findByEmail(SecurityUtils.getUserEmailFromToken(token));
+
+        User user = userService.findByEmail(auth.getName());
 
         String filter = filterPassword(user);
         return ResponseEntity.status(HttpStatus.OK).body(filter);
@@ -52,11 +57,8 @@ public class UserRestController {
     public ResponseEntity<String> addUser(@RequestBody @Valid User theUser) throws JsonProcessingException{
 
 //        // check if the email follow the rules
-//
-//        if(!Utils.usernamePatternCorrect(theUser.getEmail())){
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sry, You must enter right email address to be your username!");
-//        }
 
+        logger.info(">>>>>> Details=" + theUser.toString());
         if(theUser.getFirstName() == null || theUser.getEmail() == null ||theUser.getLastName() == null || theUser.getPassword()==null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Luck of Attribute!");
         }
@@ -74,14 +76,14 @@ public class UserRestController {
 
     @PutMapping("/user/self")
     @ResponseBody
-    public ResponseEntity<String> updateUser(@RequestBody @Valid User theUser, @RequestHeader (name="Authorization") String token) throws JsonProcessingException{
+    public ResponseEntity<String> updateUser(@RequestBody @Valid User theUser,Authentication auth) throws JsonProcessingException{
         if(theUser.getId() != null
                 || theUser.getCreatedTime() != null
                 || theUser.getUpdateTime() != null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You input some field that are not allowed to be modified.");
         }
 
-        if(!theUser.getEmail().equals(SecurityUtils.getUserEmailFromToken(token))){
+        if(!theUser.getEmail().equals(auth.getName())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Sry You cannot update other's info.");
         }
 
@@ -89,16 +91,31 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Your password is not follow the rule.");
         }
 
-        theUser.setId(SecurityUtils.getUserIdFromToken(token));
+        logger.info(">>>>>>>name: " + auth.getName());
+        logger.info(">>>>>>>>principle: " + auth.getPrincipal());
+        logger.info(">>>>>>>>autho: " + auth.getAuthorities());
+        logger.info(">>>>>>>>Details: " + auth.getDetails());
+        logger.info(">>>>>>>Credentials: " + auth.getCredentials());
+
 
         if(theUser.getFirstName() == null || theUser.getLastName() == null || theUser.getPassword()==null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Partial PUT is never RESTFUL!");
         }
-        userService.updateUser(theUser);
 
-        String filter = filterPassword(theUser);
+        User updateUser = userService.findByEmail(auth.getName());
+
+        updateUser.setFirstName(theUser.getFirstName());
+        updateUser.setLastName(theUser.getLastName());
+        updateUser.setPassword(theUser.getPassword());
+
+
+        userService.updateUser(updateUser);
+
+        String filter = filterPassword(updateUser);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(filter);
     }
+
+
 
     @DeleteMapping("/user/{email}")
     public String deleteUser(@PathVariable String email){

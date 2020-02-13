@@ -1,14 +1,19 @@
 package com.mengchen.webapp.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.CascadeType;
+
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-//@TypeDef(name = "json", typeClass = JsonStringType.class)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "billing")
 public class Bill {
 
@@ -48,14 +53,18 @@ public class Bill {
     @Column(name= "payment_status")
     private PaymentStatus payment_status;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL)
+    @Cascade(value = {CascadeType.DELETE})
+    @JoinColumn(name = "attachment", referencedColumnName = "id")
+    @JsonManagedReference
+    private File attachment;
+
     public Bill() {
     }
-
 
     enum PaymentStatus{
         paid, due, past_due, no_payment_required
     }
-
 
     @PrePersist
     public void prePersist() {
@@ -148,10 +157,18 @@ public class Bill {
         this.payment_status = payment_status;
     }
 
+    public File getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(File attachment) {
+        this.attachment = attachment;
+    }
+
     @Override
     public String toString() {
         return "Bill{" +
-                "billing_id='" + bill_id + '\'' +
+                "bill_id='" + bill_id + '\'' +
                 ", created_ts='" + created_ts + '\'' +
                 ", updated_ts='" + updated_ts + '\'' +
                 ", owner_id='" + owner_id + '\'' +
@@ -159,8 +176,9 @@ public class Bill {
                 ", bill_date='" + bill_date + '\'' +
                 ", due_date='" + due_date + '\'' +
                 ", amount_due=" + amount_due +
-                ", categories='" + categories + '\'' +
-                ", paymentStatus=" + payment_status +
+                ", categories=" + categories +
+                ", payment_status=" + payment_status +
+                ", attachment='" + attachment + '\'' +
                 '}';
     }
 }

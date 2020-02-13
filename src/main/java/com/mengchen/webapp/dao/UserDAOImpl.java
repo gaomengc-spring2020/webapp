@@ -1,10 +1,13 @@
 package com.mengchen.webapp.dao;
 
+import com.mengchen.webapp.entity.Authorities;
 import com.mengchen.webapp.entity.User;
+import com.mengchen.webapp.entity.Users;
 import com.mengchen.webapp.security.SecurityUtils;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -51,10 +54,21 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public void createUser(User theUser) {
-
         Session currentSession = entityManager.unwrap(Session.class);
 
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        Users users = new Users();
+        users.setUserName(theUser.getEmail());
+        users.setPassword("{bcrypt}" + encoder.encode(theUser.getPassword()));
+        users.setEnabled(true);
+
+        Authorities authorities = new Authorities();
+        authorities.setUserName(theUser.getEmail());
+        authorities.setAuthority("ROLE_USER");
+
         currentSession.save(theUser);
+        currentSession.save(users);
+        currentSession.save(authorities);
     }
 
     @Override

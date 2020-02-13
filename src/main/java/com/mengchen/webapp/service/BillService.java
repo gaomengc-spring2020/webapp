@@ -2,6 +2,7 @@ package com.mengchen.webapp.service;
 
 
 import com.mengchen.webapp.entity.Bill;
+import com.mengchen.webapp.entity.File;
 import com.mengchen.webapp.entity.User;
 
 import java.util.List;
@@ -21,4 +22,6 @@ public interface BillService {
 
     // PUT /v1/bill/{id}
     void updateBill(Bill theBill);
+
+    Bill uploadAttachment(Bill theBill);
 }
