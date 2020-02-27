@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @Validated
 @Service
 public class FileServiceImpl implements FileService{
@@ -36,7 +38,7 @@ public class FileServiceImpl implements FileService{
     }
 
     @Override
-    public void deleteFile(String theFileId) {
+    public void deleteFile(String theFileId) throws IOException {
         fileDAO.deleteFile(theFileId);
     }
 }

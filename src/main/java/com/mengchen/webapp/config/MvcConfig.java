@@ -14,15 +14,18 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
 import java.util.logging.Logger;
+import java.lang.System;
 
 @Configuration
 @EnableWebMvc
 @ComponentScan(basePackages = "com.mengchen.webapp")
-@PropertySource("classpath:persistence-mysql.properties")
+@PropertySource("classpath:application.properties")
 public class MvcConfig {
+
 
     @Autowired
     private Environment env;
+
 
     private Logger logger = Logger.getLogger(getClass().getName());
 
@@ -30,14 +33,15 @@ public class MvcConfig {
     public DataSource securityDataSource() {
         ComboPooledDataSource securityDataSource = new ComboPooledDataSource();
 
+
         try{
-            securityDataSource.setDriverClass(env.getProperty("jdbc.driver"));
+            securityDataSource.setDriverClass("com.mysql.jdbc.Driver");
         }catch (PropertyVetoException e){
             throw new RuntimeException(e);
         }
 
-        logger.info(">>>>>> jdbc.url=" + env.getProperty("jdbc.url"));
-        logger.info(">>>>>> jdbc.user=" + env.getProperty("jdbc.user"));
+        logger.info(">>>>>> jdbc.url=" + env.getProperty("spring.datasource.url"));
+        logger.info(">>>>>> jdbc.user=" + env.getProperty("spring.datasource.username"));
 
         // set database connection props
         securityDataSource.setJdbcUrl(env.getProperty("spring.datasource.url"));
@@ -45,10 +49,10 @@ public class MvcConfig {
         securityDataSource.setPassword(env.getProperty("spring.datasource.password"));
 
         // set connection pool props
-        securityDataSource.setInitialPoolSize(150);
-        securityDataSource.setMinPoolSize(150);
-        securityDataSource.setMinPoolSize(500);
-        securityDataSource.setMaxIdleTime(300);
+        securityDataSource.setInitialPoolSize(5);
+        securityDataSource.setMinPoolSize(5);
+        securityDataSource.setMaxPoolSize(20);
+        securityDataSource.setMaxIdleTime(3000);
 
         return securityDataSource;
     }

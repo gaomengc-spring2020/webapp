@@ -1,6 +1,7 @@
 package com.mengchen.webapp;
 
 import com.mengchen.webapp.properties.FileStorageProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -13,6 +14,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 public class WebApplication {
 
 	public static void main(String[] args) {
+
+
+		System.out.println();
+		System.out.println(">>>> envTest = " + System.getenv("S3") + System.getProperty("S3"));
+
 		SpringApplication.run(WebApplication.class, args);
 	}
 
