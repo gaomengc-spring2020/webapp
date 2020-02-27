@@ -6,6 +6,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.mengchen.webapp.entity.Bill;
 import com.mengchen.webapp.entity.File;
 import com.mengchen.webapp.exceptions.FileStorageException;
@@ -78,11 +79,14 @@ public class FileDAOImpl implements FileDAO{
 //            }
 //            uploadPath.toFile().mkdir();
 //
-//            //            Path uploadPath = this.rootLocation.
+//            //Path uploadPath = this.rootLocation.
 //            Files.copy(file.getInputStream(), uploadPath.resolve(file.getOriginalFilename()));
 //        } catch (IOException e) {
 //            throw new FileStorageException("Failed to store file " + file.getOriginalFilename(), e);
 //        }
+
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+
 
         AmazonS3 s3client = AmazonS3ClientBuilder
                 .standard()
@@ -92,7 +96,7 @@ public class FileDAOImpl implements FileDAO{
         if(this.s3BucketName == null){
             this.s3BucketName = System.getenv("AWS_S3_BUCKET_NAME");
         }
-        String fileKey = "uploads/"+ theBill.getBill_id();
+        String fileKey = "uploads/"+ theBill.getBill_id() + "/" + fileName;
         try {
             s3client.putObject(
                     s3BucketName,
@@ -103,7 +107,6 @@ public class FileDAOImpl implements FileDAO{
             throw new FileStorageException("Failed to store file " + file.getOriginalFilename(), ex);
         }
 
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
         // Check if the file's name contains invalid characters
         if(fileName.contains("..")) {
@@ -160,12 +163,11 @@ public class FileDAOImpl implements FileDAO{
 
 //        Path filePath = Paths.get(this.rootLocation + "/" + findFile(theFileId).getBill().getBill_id());
 
-        String fileKey = "uploads/" + findFile(theFileId).getBill().getBill_id();
+        String fileKey = "uploads/" + findFile(theFileId).getBill().getBill_id() +"/" + findFile(theFileId).getFileName();
 
-        s3client.deleteObject(
-                s3BucketName,
-                fileKey
-        );
+
+        DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest( s3BucketName ).withKeys( fileKey );
+        s3client.deleteObjects(deleteObjectsRequest);
 
 //        FileSystemUtils.deleteRecursively(filePath);
 
