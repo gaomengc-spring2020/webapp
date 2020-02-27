@@ -1,10 +1,10 @@
-create table user_directory.bill_categories
+create table if not exists csye6225.bill_categories
 (
     bill_id    varchar(80) null,
     categories varchar(45) null
 );
 
-create table user_directory.file
+create table if not exists csye6225.file
 (
     file_name    varchar(100) not null,
     id           varchar(45)  not null
@@ -18,9 +18,10 @@ create table user_directory.file
     owner_email  varchar(50)  null
 );
 
-create table user_directory.billing
+create table if not exists csye6225.billing
 (
-    id             varchar(80)                                             not null,
+    id             varchar(80)                                             not null
+        primary key,
     created_ts     varchar(45)                                             null,
     updated_ts     varchar(45)                                             null,
     owner_id       varchar(45)                                             not null,
@@ -34,14 +35,12 @@ create table user_directory.billing
     constraint id_UNIQUE
         unique (id),
     constraint file___fk
-        foreign key (attachment) references user_directory.file (id)
+        foreign key (attachment) references csye6225.file (id)
             on update cascade
 );
 
-alter table user_directory.billing
-    add primary key (id);
 
-create table user_directory.user
+create table  if not exists csye6225.user
 (
     id              varchar(36) charset utf8mb4 default '0' not null comment 'PRIMARY KEY'
         primary key,
@@ -55,7 +54,7 @@ create table user_directory.user
 )
     charset = latin1;
 
-create table user_directory.users
+create table  if not exists csye6225.users
 (
     username varchar(50)       not null
         primary key,
@@ -63,13 +62,13 @@ create table user_directory.users
     enabled  tinyint default 1 not null
 );
 
-create table user_directory.authorities
+create table  if not exists csye6225.authorities
 (
     username  varchar(50) not null,
     authority varchar(50) not null,
     constraint ix_auth_username
         unique (username, authority),
     constraint authorities_ibfk_1
-        foreign key (username) references user_directory.users (username)
+        foreign key (username) references csye6225.users (username)
 );
 
