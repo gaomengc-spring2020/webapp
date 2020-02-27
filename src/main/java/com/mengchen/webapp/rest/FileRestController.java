@@ -17,13 +17,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 @Validated
 @RestController
@@ -74,7 +69,12 @@ public class FileRestController {
             File theFile = theBill.getAttachment();
             theBill.setAttachment(null);
             billService.updateBill(theBill);
-            fileService.deleteFile(theFile.getId());
+            try{
+                fileService.deleteFile(theFile.getId());
+            }catch (IOException | NullPointerException ex){
+                ex.printStackTrace();
+            }
+
         }
 
         File theFile = new File();
@@ -94,6 +94,7 @@ public class FileRestController {
                                            @PathVariable String bill_id,
                                            @PathVariable String file_id) throws JsonProcessingException {
         //TODO: check if the file exist
+
         try{
             if(!userService.findByEmail(auth.getName()).getId()
                     .equals(billService.findBill(bill_id).getOwner_id() )) {
@@ -105,6 +106,8 @@ public class FileRestController {
         }
 
         File theFile = fileService.findFile(file_id);
+
+        if(theFile == null ) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no such file");
 
         return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theFile));
     }
@@ -125,15 +128,15 @@ public class FileRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sry, There is no such Entity.");
         }
 
-////
         Bill theBill = billService.findBill(bill_id);
 
         theBill.setAttachment(null);
         billService.updateBill(theBill);
-//
-        fileService.deleteFile(file_id);
-
-
+        try{
+            fileService.deleteFile(file_id);
+        }catch (NullPointerException | IOException ex){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No such file for this bill");
+        }
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
 

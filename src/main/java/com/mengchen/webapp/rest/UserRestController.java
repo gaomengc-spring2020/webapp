@@ -59,6 +59,7 @@ public class UserRestController {
 //        // check if the email follow the rules
 
         logger.info(">>>>>> Details=" + theUser.toString());
+
         if(theUser.getFirstName() == null || theUser.getEmail() == null ||theUser.getLastName() == null || theUser.getPassword()==null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Luck of Attribute!");
         }

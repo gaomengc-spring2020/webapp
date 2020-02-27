@@ -24,7 +24,6 @@ public class UserDAOImpl implements UserDAO {
         entityManager = theEntityManager;
     }
 
-
     @Override
     public List<User> listAllUser() {
 

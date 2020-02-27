@@ -1,5 +1,11 @@
 package com.mengchen.webapp.dao;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.mengchen.webapp.entity.Bill;
 import com.mengchen.webapp.entity.File;
 import com.mengchen.webapp.exceptions.FileStorageException;
@@ -10,6 +16,8 @@ import com.mengchen.webapp.service.BillService;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
@@ -17,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 import javax.xml.bind.DatatypeConverter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -29,6 +38,9 @@ import java.util.logging.Logger;
 @Repository
 public class FileDAOImpl implements FileDAO{
 
+//    @Autowired
+//    Environment env;
+
     @Autowired
     FileRepository fileRepository;
 
@@ -38,31 +50,57 @@ public class FileDAOImpl implements FileDAO{
     private org.jboss.logging.Logger logger = org.jboss.logging.Logger.getLogger(org.jboss.logging.Logger.class);
 
 
+    @Value("${aws.s3.bucket.name}")
+    private String s3BucketName;
+
+    @Value("${aws.region}")
+    private String awsRegion;
+
+    @Value("${aws.s3.bucket.url}")
+    private String s3BucketUrl;
 
     private EntityManager entityManager;
 
-    private Path rootLocation;
 
     @Autowired
-    public FileDAOImpl (FileStorageProperties fileStorageProperties,EntityManager theEntityManager){
-        this.rootLocation = Paths.get(fileStorageProperties.getLocation());
+    public FileDAOImpl (EntityManager theEntityManager){
+//        this.rootLocation = Paths.get(fileStorageProperties.getLocation());
         this.entityManager = theEntityManager;
     }
 
     @Override
     public File storeFile(MultipartFile file, Bill theBill) {
-        Path uploadPath = Paths.get(this.rootLocation + "/" + theBill.getBill_id());
+//        Path uploadPath = Paths.get(this.rootLocation + "/" + theBill.getBill_id());
 
+//        try {
+//            if (file.isEmpty()) {
+//                throw new FileStorageException("Failed to store empty file " + file.getOriginalFilename());
+//            }
+//            uploadPath.toFile().mkdir();
+//
+//            //            Path uploadPath = this.rootLocation.
+//            Files.copy(file.getInputStream(), uploadPath.resolve(file.getOriginalFilename()));
+//        } catch (IOException e) {
+//            throw new FileStorageException("Failed to store file " + file.getOriginalFilename(), e);
+//        }
+
+        AmazonS3 s3client = AmazonS3ClientBuilder
+                .standard()
+                .withRegion(awsRegion)
+                .build();
+
+        if(this.s3BucketName == null){
+            this.s3BucketName = System.getenv("AWS_S3_BUCKET_NAME");
+        }
+        String fileKey = "uploads/"+ theBill.getBill_id();
         try {
-            if (file.isEmpty()) {
-                throw new FileStorageException("Failed to store empty file " + file.getOriginalFilename());
-            }
-            uploadPath.toFile().mkdir();
-
-            //            Path uploadPath = this.rootLocation.
-            Files.copy(file.getInputStream(), uploadPath.resolve(file.getOriginalFilename()));
-        } catch (IOException e) {
-            throw new FileStorageException("Failed to store file " + file.getOriginalFilename(), e);
+            s3client.putObject(
+                    s3BucketName,
+                    fileKey,
+                    convert(file)
+            );
+        } catch (IOException ex) {
+            throw new FileStorageException("Failed to store file " + file.getOriginalFilename(), ex);
         }
 
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
@@ -76,7 +114,7 @@ public class FileDAOImpl implements FileDAO{
 
         theFile.setFileName(fileName);
         theFile.setSize(file.getSize());
-        theFile.setUrl(uploadPath.toString());
+        theFile.setUrl(s3BucketUrl+fileKey);
         theFile.setOriginName(file.getOriginalFilename());
         theFile.setContentType(file.getContentType());
         theFile.setHash(getMD5(file));
@@ -105,22 +143,31 @@ public class FileDAOImpl implements FileDAO{
                 currentSession.createQuery("from File where id=:fileId", File.class);
         theQuery.setParameter("fileId", theFileId);
 
-        File theFile = theQuery.uniqueResultOptional().orElse(null);
-        if(theFile == null ) return null;
-
-        return theFile;
+        return theQuery.uniqueResultOptional().orElse(null);
     }
 
     @Override
-    public void deleteFile(String theFileId) {
+    public void deleteFile(String theFileId) throws NullPointerException , IOException {
 
-        try{
-            Path filePath = Paths.get(this.rootLocation + "/" + findFile(theFileId).getBill().getBill_id());
-            FileSystemUtils.deleteRecursively(filePath);
+        AmazonS3 s3client = AmazonS3ClientBuilder
+                .standard()
+                .withRegion(awsRegion)
+                .build();
 
-        }catch (NullPointerException | IOException ex){
-            ex.printStackTrace();
+        if(this.s3BucketName == null){
+            this.s3BucketName = System.getenv("AWS_S3_BUCKET_NAME");
         }
+
+//        Path filePath = Paths.get(this.rootLocation + "/" + findFile(theFileId).getBill().getBill_id());
+
+        String fileKey = "uploads/" + findFile(theFileId).getBill().getBill_id();
+
+        s3client.deleteObject(
+                s3BucketName,
+                fileKey
+        );
+
+//        FileSystemUtils.deleteRecursively(filePath);
 
 
         fileRepository.deleteById(theFileId);
@@ -140,5 +187,14 @@ public class FileDAOImpl implements FileDAO{
             e.printStackTrace();
         }
         return null;
+    }
+
+    public java.io.File convert(MultipartFile file) throws IOException {
+        java.io.File convFile = new java.io.File(file.getOriginalFilename());
+        convFile.createNewFile();
+        FileOutputStream fos = new FileOutputStream(convFile);
+        fos.write(file.getBytes());
+        fos.close();
+        return convFile;
     }
 }

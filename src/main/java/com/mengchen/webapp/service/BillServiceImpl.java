@@ -2,7 +2,6 @@ package com.mengchen.webapp.service;
 
 import com.mengchen.webapp.dao.BillDAO;
 import com.mengchen.webapp.entity.Bill;
-import com.mengchen.webapp.entity.File;
 import com.mengchen.webapp.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,7 +45,6 @@ public class BillServiceImpl implements BillService{
     public Bill findBill(String billID){
         return billDAO.findBill(billID);
     }
-
 
     @Override
     @Transactional

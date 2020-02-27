@@ -78,6 +78,7 @@ public class BillDAOImpl implements BillDAO{
 //                currentSession.createQuery("delete from Bill where bill_id=:billID");
 //        theQuery.setParameter("billID", billID);
 //
+
         try{
             Path filePath = Paths.get(fileStorageProperties.getLocation() + "/" + billID);
             FileSystemUtils.deleteRecursively(filePath);
