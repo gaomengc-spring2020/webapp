@@ -171,7 +171,6 @@ public class FileDAOImpl implements FileDAO{
 
 //        FileSystemUtils.deleteRecursively(filePath);
 
-
         fileRepository.deleteById(theFileId);
         logger.info(">>>>>> FileDAO: deleteFile: " + "deleted");
 
