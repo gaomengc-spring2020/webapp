@@ -1,26 +1,18 @@
 package com.mengchen.webapp.dao;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.mengchen.webapp.entity.Bill;
 import com.mengchen.webapp.entity.File;
 import com.mengchen.webapp.exceptions.FileStorageException;
-import com.mengchen.webapp.properties.FileStorageProperties;
 import com.mengchen.webapp.repository.BillRepository;
 import com.mengchen.webapp.repository.FileRepository;
-import com.mengchen.webapp.service.BillService;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,13 +20,8 @@ import javax.persistence.EntityManager;
 import javax.xml.bind.DatatypeConverter;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.logging.Logger;
 
 @Repository
 public class FileDAOImpl implements FileDAO{
@@ -49,7 +36,6 @@ public class FileDAOImpl implements FileDAO{
     BillRepository billRepository;
 
     private org.jboss.logging.Logger logger = org.jboss.logging.Logger.getLogger(org.jboss.logging.Logger.class);
-
 
     @Value("${aws.s3.bucket.name}")
     private String s3BucketName;
@@ -152,6 +138,17 @@ public class FileDAOImpl implements FileDAO{
     @Override
     public void deleteFile(String theFileId) throws NullPointerException , IOException {
 
+
+        deleteFileInS3(theFileId);
+//        FileSystemUtils.deleteRecursively(filePath);
+
+        fileRepository.deleteById(theFileId);
+        logger.info(">>>>>> FileDAO: deleteFile: " + "deleted");
+
+    }
+
+    @Override
+    public void deleteFileInS3(String theFileId){
         AmazonS3 s3client = AmazonS3ClientBuilder
                 .standard()
                 .withRegion(awsRegion)
@@ -169,10 +166,7 @@ public class FileDAOImpl implements FileDAO{
         DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest( s3BucketName ).withKeys( fileKey );
         s3client.deleteObjects(deleteObjectsRequest);
 
-//        FileSystemUtils.deleteRecursively(filePath);
-
-        fileRepository.deleteById(theFileId);
-        logger.info(">>>>>> FileDAO: deleteFile: " + "deleted");
+        logger.info(">>>>>> FileDAO: deleteFile in S3: " + "deleted");
 
     }
 

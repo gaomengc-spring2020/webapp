@@ -29,6 +29,9 @@ public class BillDAOImpl implements BillDAO{
     FileStorageProperties fileStorageProperties;
 
     @Autowired
+    FileDAO fileDAO;
+
+    @Autowired
     BillRepository billRepository;
 
     private Logger logger = Logger.getLogger(Logger.class);
@@ -78,15 +81,16 @@ public class BillDAOImpl implements BillDAO{
 //                currentSession.createQuery("delete from Bill where bill_id=:billID");
 //        theQuery.setParameter("billID", billID);
 //
+        fileDAO.deleteFileInS3(findBill(billID).getAttachment().getId());
 
-        try{
-            Path filePath = Paths.get(fileStorageProperties.getLocation() + "/" + billID);
-            FileSystemUtils.deleteRecursively(filePath);
-
-        }catch (NullPointerException | IOException ex){
-            ex.printStackTrace();
-        }
-
+//        try{
+//            Path filePath = Paths.get(fileStorageProperties.getLocation() + "/" + billID);
+//            FileSystemUtils.deleteRecursively(filePath);
+//
+//        }catch (NullPointerException | IOException ex){
+//            ex.printStackTrace();
+//        }
+//
         billRepository.deleteById(billID);
 //        theQuery.executeUpdate();
     }
