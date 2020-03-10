@@ -11,6 +11,10 @@ out/
 
 target/
 upload-dir/
+.settings/
+.classpath
+.factorypath
+.project
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/

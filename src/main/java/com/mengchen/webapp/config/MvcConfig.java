@@ -22,7 +22,6 @@ import java.lang.System;
 @PropertySource("classpath:application.properties")
 public class MvcConfig {
 
-
     @Autowired
     private Environment env;
 
@@ -32,7 +31,6 @@ public class MvcConfig {
     @Bean
     public DataSource securityDataSource() {
         ComboPooledDataSource securityDataSource = new ComboPooledDataSource();
-
 
         try{
             securityDataSource.setDriverClass("com.mysql.jdbc.Driver");
