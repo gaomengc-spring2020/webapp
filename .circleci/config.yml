@@ -114,6 +114,7 @@ jobs:
               --application-name ${CODEDEPLOY_APPLICATION_NAME} \
               --deployment-config-name CodeDeployDefault.AllAtOnce \
               --deployment-group-name ${CODEDEPLOY_APPLICATION_DEPLOYMENT_GROUP_NAME} \
+              --ignore-application-stop-failures \
               --description "CSYE6225 - CODEDEPLOY" \
               --s3-location bucket=${S3_CODEDEPLOY_BUCKET},key=csye6225-webapp-${CIRCLE_BUILD_NUM}.zip,bundleType=zip \
               --region us-east-1 \
