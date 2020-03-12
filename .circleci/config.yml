@@ -74,6 +74,13 @@ jobs:
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
       - run:
+          name: install tools
+          command: |
+            sudo apt-get -y update
+            sudo apt-get -y install awscli
+            aws --version
+
+      - run:
           name: create war file
           command: |
             mvn package
@@ -81,7 +88,6 @@ jobs:
             ls -al
             ls -al ./target
             cp target/assignment2-0.0.1-SNAPSHOT.war ROOT.war
-
 
       - run:
           name: Build Deployment Artifact
