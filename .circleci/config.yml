@@ -29,7 +29,9 @@ jobs:
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
       # run tests!
-      - run: mvn integration-test
+      - run:
+          name: integration test
+          command: mvn integration-test
 
 
   build:
@@ -62,16 +64,58 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
-      - run: mvn dependency:go-offline
-
+      - run:
+          name: mvn dependency
+          command: mvn dependency:go-offline
 
       - save_cache:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
-      # run tests!
-      - run: mvn integration-test
+      - run:
+          name: create war file
+          command: |
+            mvn package
+            pwd
+            ls -al
+            ls -al ./target
+            cp target/assignment2-0.0.1-SNAPSHOT.war ROOT.war
+
+
+      - run:
+          name: Build Deployment Artifact
+          command: |
+            mkdir codedeploy_artifact
+            zip -r csye6225-webapp-${CIRCLE_BUILD_NUM}.zip ROOT.war codedeploy/*.sh appspec.yml
+            pwd
+            ls -al
+            mv csye6225-webapp-${CIRCLE_BUILD_NUM}.zip codedeploy_artifact/
+            ls -al
+            pwd
+            cd codedeploy_artifact
+            pwd
+            ls -al
+            cd ..
+            pwd
+            ls -al
+
+      - run:
+          name: Copy Artifact to S3
+          command: |
+            aws s3 sync ./codedeploy_artifact s3://${S3_CODEDEPLOY_BUCKET}
+
+      - run:
+          name: CodeDeploy API call
+          command: |
+            aws deploy create-deployment \
+              --application-name ${CODEDEPLOY_APPLICATION_NAME} \
+              --deployment-config-name CodeDeployDefault.AllAtOnce \
+              --deployment-group-name ${CODEDEPLOY_APPLICATION_DEPLOYMENT_GROUP_NAME} \
+              --description "CSYE6225 - CODEDEPLOY" \
+              --s3-location bucket=${S3_CODEEDEPLOY_BUCKET},key=csye6225-webapp-${CIRCLE_BUILD_NUM}.zip,bundleType=zip \
+              --region us-east-1 \
+              --output json
 
 workflows:
   version: 2

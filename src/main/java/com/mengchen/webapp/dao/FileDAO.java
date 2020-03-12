@@ -11,4 +11,5 @@ public interface FileDAO {
     File uploadFile(File theFile);
     File findFile(String theFileId);
     void deleteFile(String theFileId) throws IOException;
+    void deleteFileInS3(String theFileId);
 }
