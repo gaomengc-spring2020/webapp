@@ -37,13 +37,13 @@ public class FileDAOImpl implements FileDAO{
 
     private org.jboss.logging.Logger logger = org.jboss.logging.Logger.getLogger(org.jboss.logging.Logger.class);
 
-    @Value("${aws.s3.bucket.name}")
+    @Value("${bucket.name}")
     private String s3BucketName;
 
     @Value("${aws.region}")
     private String awsRegion;
 
-    @Value("${aws.s3.bucket.url}")
+    @Value("${bucket.url}")
     private String s3BucketUrl;
 
     private EntityManager entityManager;
@@ -80,7 +80,7 @@ public class FileDAOImpl implements FileDAO{
                 .build();
 
         if(this.s3BucketName == null){
-            this.s3BucketName = System.getenv("AWS_S3_BUCKET_NAME");
+            this.s3BucketName = System.getenv("bucket.name");
         }
         String fileKey = "uploads/"+ theBill.getBill_id() + "/" + fileName;
         try {
@@ -155,7 +155,7 @@ public class FileDAOImpl implements FileDAO{
                 .build();
 
         if(this.s3BucketName == null){
-            this.s3BucketName = System.getenv("AWS_S3_BUCKET_NAME");
+            this.s3BucketName = System.getenv("bucket.name");
         }
 
 //        Path filePath = Paths.get(this.rootLocation + "/" + findFile(theFileId).getBill().getBill_id());
