@@ -15,5 +15,6 @@
         runas: ubuntu
     ApplicationStop:
       - location: ./codedeploy/applicationStop.sh
-        timeout: 180
+        timeout: 120
         runas: ubuntu
+
