@@ -1,44 +1,46 @@
-# Java Maven CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-java/ for more details
-#
+  # Java Maven CircleCI 2.0 configuration file
+  #
+  # Check https://circleci.com/docs/2.0/language-java/ for more details
+  #
 
-version: 2
-jobs:
-  pr_check:
-    docker:
-      # specify the version you desire here
+  version: 2
+  jobs:
+    pr_check:
+      docker:
+        # specify the version you desire here
         - image: circleci/openjdk:8-jdk
 
-    steps:
-      - checkout
+      steps:
+        - checkout
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "pom.xml" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+        # Download and cache dependencies
+        - restore_cache:
+            keys:
+              - v1-dependencies-{{ checksum "pom.xml" }}
+              # fallback to using the latest cache if no exact match is found
+              - v1-dependencies-
 
-      - run: mvn dependency:go-offline
-
-
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: v1-dependencies-{{ checksum "pom.xml" }}
-
-      # run tests!
-      - run: mvn integration-test
+        - run: mvn dependency:go-offline
 
 
-  build:
-    filter:
-      branch:
-        only:
-          - master
-    docker:
-      # specify the version you desire here
+        - save_cache:
+            paths:
+              - ~/.m2
+            key: v1-dependencies-{{ checksum "pom.xml" }}
+
+        # run tests!
+        - run:
+            name: integration test
+            command: mvn integration-test
+
+
+    build:
+      filter:
+        branch:
+          only:
+            - master
+      docker:
+        # specify the version you desire here
         - image: circleci/openjdk:8-jdk
 
         # Specify service dependencies here if necessary
@@ -46,44 +48,87 @@ jobs:
         # documented at https://circleci.com/docs/2.0/circleci-images/
         # - image: circleci/postgres:9.4
 
-    working_directory: ~/repo
+      working_directory: ~/repo
 
-    environment:
-      # Customize the JVM maximum heap limit
-      MAVEN_OPTS: -Xmx3200m
+      environment:
+        # Customize the JVM maximum heap limit
+        MAVEN_OPTS: -Xmx3200m
 
-    steps:
-      - checkout
+      steps:
+        - checkout
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "pom.xml" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+        # Download and cache dependencies
+        - restore_cache:
+            keys:
+              - v1-dependencies-{{ checksum "pom.xml" }}
+              # fallback to using the latest cache if no exact match is found
+              - v1-dependencies-
 
-      - run: mvn dependency:go-offline
+        - run:
+            name: mvn dependency
+            command: mvn dependency:go-offline
 
+        - save_cache:
+            paths:
+              - ~/.m2
+            key: v1-dependencies-{{ checksum "pom.xml" }}
 
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: v1-dependencies-{{ checksum "pom.xml" }}
-
-      # run tests!
-      - run: mvn integration-test
-
-workflows:
-  version: 2
-  pr-check-workflow:
-    jobs:
-      - pr_check
-  build-deploy-workflow:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only:
-                - master
+        - run:
+            name: install tools
+            command: |
+              sudo apt-get -y update
+              sudo apt-get -y install awscli
+              aws --version
+        - run:
+            name: create war file
+            command: |
+              mvn package
+              pwd
+              ls -al
+              ls -al ./target
+              cp target/assignment2-0.0.1-SNAPSHOT.war ROOT.war
+        - run:
+            name: Build Deployment Artifact
+            command: |
+              mkdir codedeploy_artifact
+              zip -r csye6225-webapp-${CIRCLE_BUILD_NUM}.zip ROOT.war codedeploy/*.sh appspec.yml
+              pwd
+              ls -al
+              mv csye6225-webapp-${CIRCLE_BUILD_NUM}.zip codedeploy_artifact/
+              ls -al
+              pwd
+              cd codedeploy_artifact
+              pwd
+              ls -al
+              cd ..
+              pwd
+              ls -al
+        - run:
+            name: Copy Artifact to S3
+            command: |
+              aws s3 sync ./codedeploy_artifact s3://${S3_CODEDEPLOY_BUCKET}
+        - run:
+            name: CodeDeploy API call
+            command: |
+              aws deploy create-deployment \
+                --application-name ${CODEDEPLOY_APPLICATION_NAME} \
+                --deployment-config-name CodeDeployDefault.AllAtOnce \
+                --deployment-group-name ${CODEDEPLOY_APPLICATION_DEPLOYMENT_GROUP_NAME} \
+                --description "CSYE6225 - CODEDEPLOY" \
+                --s3-location bucket=${S3_CODEDEPLOY_BUCKET},key=csye6225-webapp-${CIRCLE_BUILD_NUM}.zip,bundleType=zip \
+                --region us-east-1 \
+                --output json
+  workflows:
+    version: 2
+    pr-check-workflow:
+      jobs:
+        - pr_check
+    build-deploy-workflow:
+      jobs:
+        - build:
+            filters:
+              branches:
+                only:
+                  - master
 
 
