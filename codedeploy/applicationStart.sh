@@ -10,4 +10,4 @@ fi
 
 
 
-sudo java -jar /home/webapp.jar
+java -jar /home/webapp.jar
