@@ -2,7 +2,7 @@
   os: linux
 
   files:
-    -source: ./webapp.jar
+    - source: ./webapp.jar
       destination: ~/wabapp.jar
   hooks:
     AfterInstall:
