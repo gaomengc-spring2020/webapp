@@ -13,10 +13,6 @@
       - location: ./codedeploy/applicationStart.sh
         timeout: 180
         runas: ubuntu
-    BeforeInstall:
-      - location: ./codedeploy/beforeInstall.sh
-        timeout: 180
-        runas: ubuntu
     ApplicationStop:
       - location: ./codedeploy/applicationStop.sh
         timeout:180
