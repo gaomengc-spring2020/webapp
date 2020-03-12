@@ -1,3 +1,7 @@
-#!/bin/bash
-sudo systemctl start tomcat.service
-sudo systemctl restart tomcat.service
+#!/bin/bash -v
+
+sudo systemctl stop tomcat8
+# shellcheck disable=SC2046
+sudo kill -9 $(lsof -t -i:8080)
+
+sudo java -jar ~/webapp.jar
