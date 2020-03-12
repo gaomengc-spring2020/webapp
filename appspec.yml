@@ -2,8 +2,8 @@
   os: linux
 
   files:
-    -source: ./ROOT.war
-      destination: /var/lib/tomcat8/webapps
+    -source: ./webapp.jar
+      destination: ~/wabapp.jar
   hooks:
     AfterInstall:
       - location: ./codedeploy/afterInstall.sh
@@ -15,5 +15,6 @@
         runas: ubuntu
     ApplicationStop:
       - location: ./codedeploy/applicationStop.sh
-        timeout: 180
+        timeout: 120
         runas: ubuntu
+
