@@ -3,7 +3,7 @@
 
   files:
     - source: ./webapp.jar
-      destination: ~/wabapp.jar
+      destination: /home/
   hooks:
     AfterInstall:
       - location: ./codedeploy/afterInstall.sh
