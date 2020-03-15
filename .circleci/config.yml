@@ -104,6 +104,7 @@ jobs:
             cd ..
             pwd
             ls -al
+
       - run:
           name: Copy Artifact to S3
           command: |
@@ -120,19 +121,5 @@ jobs:
               --s3-location bucket=${S3_CODEDEPLOY_BUCKET},key=csye6225-webapp-${CIRCLE_BUILD_NUM}.zip,bundleType=zip \
               --region ${REGION} \
               --output json  \
-            
-
-workflows:
-  version: 2
-  pr-check-workflow:
-    jobs:
-      - pr_check
-  build-deploy-workflow:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only:
-                - master
 
 
