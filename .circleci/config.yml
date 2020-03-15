@@ -79,6 +79,7 @@ jobs:
             sudo apt-get -y update
             sudo apt-get -y install awscli
             aws --version
+
       - run:
           name: create war file
           command: |
@@ -118,7 +119,7 @@ jobs:
               --description "CSYE6225 - CODEDEPLOY" \
               --s3-location bucket=${S3_CODEDEPLOY_BUCKET},key=csye6225-webapp-${CIRCLE_BUILD_NUM}.zip,bundleType=zip \
               --region ${REGION} \
-              --output json
+              --output json  \
 
 workflows:
   version: 2
