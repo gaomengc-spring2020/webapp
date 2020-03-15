@@ -120,6 +120,7 @@ jobs:
               --s3-location bucket=${S3_CODEDEPLOY_BUCKET},key=csye6225-webapp-${CIRCLE_BUILD_NUM}.zip,bundleType=zip \
               --region ${REGION} \
               --output json  \
+            
 
 workflows:
   version: 2
