@@ -104,6 +104,7 @@ jobs:
             cd ..
             pwd
             ls -al
+
       - run:
           name: Copy Artifact to S3
           command: |
