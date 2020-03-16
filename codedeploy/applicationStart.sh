@@ -8,4 +8,5 @@ else
       sudo systemctl stop tomcat8
 fi
 
+source ~/.bash_profile
 java -jar /home/webapp.jar
