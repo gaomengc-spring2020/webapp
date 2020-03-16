@@ -16,6 +16,7 @@ public class WebApplication {
 	public static void main(String[] args) {
 
 		System.out.println(System.getenv("RDS_MYSQL_DB_HOST"));
+
 		SpringApplication.run(WebApplication.class, args);
 	}
 
