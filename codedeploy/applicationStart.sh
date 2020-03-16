@@ -2,5 +2,5 @@
 
 sudo systemctl stop tomcat8
 
-source ~/.bash_profile
+source /env/properties.sh
 java -jar /home/webapp.jar > /dev/null 2> /dev/null < /dev/null &
