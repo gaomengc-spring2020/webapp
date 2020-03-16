@@ -5,4 +5,4 @@ then
       echo "nothing runs on 8080"
 else
       sudo systemctl stop tomcat8
-fisu
+fi
