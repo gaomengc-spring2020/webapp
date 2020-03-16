@@ -2,5 +2,5 @@
 
 # add env variables
 
-source ~/.bash_profile
+source /env/properties.sh
 

@@ -8,4 +8,4 @@ else
       sudo systemctl stop tomcat8
 fi
 
-source ~/.bash_profile
+source /env/properties.sh
