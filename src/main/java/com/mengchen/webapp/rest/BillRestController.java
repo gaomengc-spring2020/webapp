@@ -28,7 +28,7 @@ import java.util.List;
 
 @Validated
 @RestController
-@RequestMapping("/v2")
+@RequestMapping("/v1")
 public class BillRestController {
 
     private BillService billService;
