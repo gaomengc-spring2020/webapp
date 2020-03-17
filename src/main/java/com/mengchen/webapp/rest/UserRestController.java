@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 
 @Validated
 @RestController
-@RequestMapping("/v2")
+@RequestMapping("/v1")
 public class UserRestController {
 
     private UserService userService;
