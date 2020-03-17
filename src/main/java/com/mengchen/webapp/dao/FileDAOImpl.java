@@ -186,8 +186,12 @@ public class FileDAOImpl implements FileDAO{
 
     public java.io.File convert(MultipartFile file) throws IOException {
         java.io.File convFile = new java.io.File(file.getOriginalFilename());
-        System.out.println(convFile.getPath());
+        logger.info(">>>>>> convFile:  " + file.getOriginalFilename());
+        logger.info(">>>>>> convFile1:  " + convFile.getPath());
+
         convFile.createNewFile();
+        logger.info(">>>>>> convFile2:  " + convFile.getPath());
+
         FileOutputStream fos = new FileOutputStream(convFile);
         fos.write(file.getBytes());
         fos.close();
