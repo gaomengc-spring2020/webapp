@@ -88,11 +88,12 @@ jobs:
             ls -al
             ls -al ./target
             cp target/assignment2-0.0.1-SNAPSHOT.jar webapp.jar
+            cp codewatch/cloudwatch-config.json cloudwatch-config.json
       - run:
           name: Build Deployment Artifact
           command: |
             mkdir codedeploy_artifact
-            zip -r csye6225-webapp-${CIRCLE_BUILD_NUM}.zip webapp.jar codedeploy/*.sh appspec.yml
+            zip -r csye6225-webapp-${CIRCLE_BUILD_NUM}.zip webapp.jar codedeploy/*.sh appspec.yml cloudwatch-config.json
             pwd
             ls -al
             mv csye6225-webapp-${CIRCLE_BUILD_NUM}.zip codedeploy_artifact/
@@ -133,6 +134,6 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - Assignment7
 
 

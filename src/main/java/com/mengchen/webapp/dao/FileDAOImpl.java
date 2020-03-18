@@ -24,6 +24,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.EnumSet;
 
+import static com.mengchen.webapp.utils.StatsDCheckPoint.StatsDCheckPoint;
+
 @Repository
 public class FileDAOImpl implements FileDAO{
 
@@ -74,6 +76,7 @@ public class FileDAOImpl implements FileDAO{
 
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
+        long startTime = System.currentTimeMillis();
 
         AmazonS3 s3client = AmazonS3ClientBuilder
                 .standard()
@@ -94,6 +97,7 @@ public class FileDAOImpl implements FileDAO{
             throw new FileStorageException("Failed to store file " + file.getOriginalFilename(), ex);
         }
 
+        StatsDCheckPoint("s3.service.sevaFile",startTime);
 
         // Check if the file's name contains invalid characters
         if(fileName.contains("..")) {
@@ -120,18 +124,25 @@ public class FileDAOImpl implements FileDAO{
 
     @Override
     public File uploadFile(File theFile) {
+        long startTime = System.currentTimeMillis();
+
         Session currentSession = entityManager.unwrap(Session.class);
         currentSession.save(theFile);
+
+        StatsDCheckPoint("database.query.uploadFile",startTime);
+
         return theFile;
     }
 
     @Override
     public File findFile(String theFileId) {
+        long startTime = System.currentTimeMillis();
 
         Session currentSession = entityManager.unwrap(Session.class);
         Query<File> theQuery =
                 currentSession.createQuery("from File where id=:fileId", File.class);
         theQuery.setParameter("fileId", theFileId);
+        StatsDCheckPoint("database.query.findFile",startTime);
 
         return theQuery.uniqueResultOptional().orElse(null);
     }
@@ -150,6 +161,8 @@ public class FileDAOImpl implements FileDAO{
 
     @Override
     public void deleteFileInS3(String theFileId){
+        long startTime = System.currentTimeMillis();
+
         AmazonS3 s3client = AmazonS3ClientBuilder
                 .standard()
                 .withRegion(awsRegion)
@@ -168,6 +181,7 @@ public class FileDAOImpl implements FileDAO{
         s3client.deleteObjects(deleteObjectsRequest);
 
         logger.info(">>>>>> FileDAO: deleteFile in S3: " + "deleted");
+        StatsDCheckPoint("s3.service.deleteFile",startTime);
 
     }
 

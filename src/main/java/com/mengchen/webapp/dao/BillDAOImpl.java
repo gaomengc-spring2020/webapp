@@ -20,6 +20,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static com.mengchen.webapp.utils.StatsDCheckPoint.StatsDCheckPoint;
+
 @Repository
 public class BillDAOImpl implements BillDAO{
 
@@ -45,14 +47,11 @@ public class BillDAOImpl implements BillDAO{
     @Override
     public Bill createBill(Bill theBill){
 
-//        theBill.setCreated_ts(LocalDateTime.now().toString());
-//        theBill.setUpdated_ts(theBill.getCreated_ts());
-
-//        theBill.setCategories(theBill.getCategories().toString());
+        long startTime = System.currentTimeMillis();
         Session currentSession = entityManager.unwrap(Session.class);
-
         currentSession.save(theBill);
 
+        StatsDCheckPoint("database.query.saveBill",startTime);
         return theBill;
 
     }
@@ -60,12 +59,16 @@ public class BillDAOImpl implements BillDAO{
     // GET /v1/bills
     @Override
     public List<Bill> findAllBills(User theUser){
+
+        long startTime = System.currentTimeMillis();
+
         Session currentSession = entityManager.unwrap(Session.class);
 
         String ownerId = theUser.getId();
         Query<Bill> theQuery =
                 currentSession.createQuery("from Bill where owner_id=:ownerId", Bill.class);
         theQuery.setParameter("ownerId", ownerId);
+        StatsDCheckPoint("database.query.findAllBill",startTime);
 
         List<Bill> bills = theQuery.getResultList();
 
@@ -75,29 +78,20 @@ public class BillDAOImpl implements BillDAO{
     // DELETE /v1/bill/{id}
     @Override
     public void deleteBill(String billID){
-//        Session currentSession = entityManager.unwrap(Session.class);
-//
-//        Query theQuery =
-//                currentSession.createQuery("delete from Bill where bill_id=:billID");
-//        theQuery.setParameter("billID", billID);
-//
-        fileDAO.deleteFileInS3(findBill(billID).getAttachment().getId());
 
-//        try{
-//            Path filePath = Paths.get(fileStorageProperties.getLocation() + "/" + billID);
-//            FileSystemUtils.deleteRecursively(filePath);
-//
-//        }catch (NullPointerException | IOException ex){
-//            ex.printStackTrace();
-//        }
-//
+        fileDAO.deleteFileInS3(findBill(billID).getAttachment().getId());
+        long startTime = System.currentTimeMillis();
+
         billRepository.deleteById(billID);
+        StatsDCheckPoint("database.query.deleteBill",startTime);
+
 //        theQuery.executeUpdate();
     }
 
     // GET /v1/bill/{id}
     @Override
     public Bill findBill(String billID){
+        long startTime = System.currentTimeMillis();
 
         Session currentSession = entityManager.unwrap(Session.class);
 
@@ -106,6 +100,8 @@ public class BillDAOImpl implements BillDAO{
         theQuery.setParameter("billID", billID);
 
         Bill theBill = theQuery.uniqueResultOptional().orElse(null);
+        StatsDCheckPoint("database.query.findBill",startTime);
+
         if(theBill == null ) return null;
 
         try {
@@ -121,18 +117,21 @@ public class BillDAOImpl implements BillDAO{
     // PUT /v1/bill/{id}
     @Override
     public void updateBill(Bill theBill){
+        long startTime = System.currentTimeMillis();
 
         Session currentSession = entityManager.unwrap(Session.class);
-
         currentSession.update(theBill);
+        StatsDCheckPoint("database.query.updateBill",startTime);
 
     }
 
     @Override
     public Bill uploadAttachment(Bill theBill) {
-        Session currentSession = entityManager.unwrap(Session.class);
+        long startTime = System.currentTimeMillis();
 
+        Session currentSession = entityManager.unwrap(Session.class);
         currentSession.update(theBill);
+        StatsDCheckPoint("database.query.uploadAttachment",startTime);
 
         try {
             logger.info(">>>>>> billDAO uploadFile: " + ConvertJSON.ConvertToJSON(findBill(theBill.getBill_id())));

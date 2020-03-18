@@ -7,6 +7,7 @@ import com.mengchen.webapp.service.BillService;
 import com.mengchen.webapp.service.FileService;
 import com.mengchen.webapp.service.UserService;
 import com.mengchen.webapp.utils.ConvertJSON;
+import com.timgroup.statsd.StatsDClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static com.mengchen.webapp.utils.StatsDCheckPoint.StatsDCheckPoint;
+
 @Validated
 @RestController
 @RequestMapping("/v1/bill")
@@ -30,6 +33,9 @@ public class FileRestController {
     UserService userService;
     private static final Logger logger = LoggerFactory.getLogger(Logger.class);
     private static final String[] check = {"image/png","application/pdf","image/jpg", "image/jpeg"};
+
+    @Autowired
+    private StatsDClient statsDClient;
 
     @Autowired
     FileRestController(BillService billService, FileService fileService, UserService userService){
@@ -43,8 +49,7 @@ public class FileRestController {
     public ResponseEntity<String> attachFile(Authentication auth,
                                              @PathVariable String bill_id,
                                              @RequestParam("file") MultipartFile file) throws JsonProcessingException {
-
-        //TODO: check if bill# exist
+        long startTime = System.currentTimeMillis();
 
         try{
             if(!userService.findByEmail(auth.getName()).getId()
@@ -74,17 +79,18 @@ public class FileRestController {
             }catch (IOException | NullPointerException ex){
                 ex.printStackTrace();
             }
-
         }
 
         File theFile = new File();
         theFile.setFileName(file.getName());
         theFile.setUrl("fileUri");
 
-
         fileService.storeFile(file,theBill);
 
         logger.info(">>>> POST file: (theBill) " + ConvertJSON.ConvertToJSON(theBill));
+
+        StatsDCheckPoint("endpoint.file.http.attachFile",startTime);
+
         return ResponseEntity.status(HttpStatus.CREATED).body( ConvertJSON.ConvertToJSON(theBill));
     }
 
@@ -93,7 +99,7 @@ public class FileRestController {
     public ResponseEntity<String> findFile(Authentication auth,
                                            @PathVariable String bill_id,
                                            @PathVariable String file_id) throws JsonProcessingException {
-        //TODO: check if the file exist
+        long startTime = System.currentTimeMillis();
 
         try{
             if(!userService.findByEmail(auth.getName()).getId()
@@ -109,6 +115,8 @@ public class FileRestController {
 
         if(theFile == null ) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no such file");
 
+        StatsDCheckPoint("endpoint.file.http.findFile",startTime);
+
         return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theFile));
     }
 
@@ -117,7 +125,7 @@ public class FileRestController {
     public ResponseEntity<String> deleteFile(Authentication auth,
                                              @PathVariable String bill_id,
                                              @PathVariable String file_id){
-
+        long startTime = System.currentTimeMillis();
         try{
             if(!userService.findByEmail(auth.getName()).getId()
                     .equals(billService.findBill(bill_id).getOwner_id() )) {
@@ -137,6 +145,8 @@ public class FileRestController {
         }catch (NullPointerException | IOException ex){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No such file for this bill");
         }
+
+        StatsDCheckPoint("endpoint.file.http.deleteFile",startTime);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
 

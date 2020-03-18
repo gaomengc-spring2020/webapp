@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import java.util.List;
 
+import static com.mengchen.webapp.utils.StatsDCheckPoint.StatsDCheckPoint;
+
 @Repository
 public class UserDAOImpl implements UserDAO {
 
@@ -26,6 +28,7 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public List<User> listAllUser() {
+        long startTime = System.currentTimeMillis();
 
         // get the current hibernate session
         Session currentSession = entityManager.unwrap(Session.class);
@@ -34,12 +37,14 @@ public class UserDAOImpl implements UserDAO {
                 currentSession.createQuery("from User", User.class);
 
         List<User> users = theQuery.getResultList();
+        StatsDCheckPoint("database.query.findAllUser",startTime);
 
         return users;
     }
 
     @Override
     public User findByEmail(String theEmail) {
+        long startTime = System.currentTimeMillis();
 
         Session currentSession = entityManager.unwrap(Session.class);
 
@@ -47,12 +52,14 @@ public class UserDAOImpl implements UserDAO {
                 currentSession.createQuery("from User where email=:theEmail", User.class);
 
         theQuery.setParameter("theEmail", theEmail);
+        StatsDCheckPoint("database.query.findByEmail",startTime);
 
         return theQuery.uniqueResultOptional().orElse(null);
     }
 
     @Override
     public void createUser(User theUser) {
+        long startTime = System.currentTimeMillis();
         Session currentSession = entityManager.unwrap(Session.class);
 
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -68,20 +75,26 @@ public class UserDAOImpl implements UserDAO {
         currentSession.save(theUser);
         currentSession.save(users);
         currentSession.save(authorities);
+        StatsDCheckPoint("database.query.createUser",startTime);
+
     }
 
     @Override
     public void updateUser(User theUser) {
+        long startTime = System.currentTimeMillis();
 
         Session currentSession = entityManager.unwrap(Session.class);
 
         theUser.setPassword(SecurityUtils.encode(theUser.getPassword()));
 
         currentSession.update(theUser);
+        StatsDCheckPoint("database.query.updateUser",startTime);
+
     }
 
     @Override
     public void deleteUser(String theEmail) {
+        long startTime = System.currentTimeMillis();
 
         Session currentSession = entityManager.unwrap(Session.class);
 
@@ -89,6 +102,8 @@ public class UserDAOImpl implements UserDAO {
                 currentSession.createQuery("delete from User where email=:theEmail");
         theQuery.setParameter("theEmail", theEmail);
         theQuery.executeUpdate();
+        StatsDCheckPoint("database.query.deleteUser",startTime);
+
     }
 
     @Override
