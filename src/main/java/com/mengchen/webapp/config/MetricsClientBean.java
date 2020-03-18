@@ -11,7 +11,6 @@ import org.springframework.core.env.Environment;
 
 public class MetricsClientBean {
 
-
     @Bean
     public StatsDClient statsDClient(
             @Value("${metrics.statsd.host}") String host,
