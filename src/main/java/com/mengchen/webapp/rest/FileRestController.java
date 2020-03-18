@@ -7,6 +7,7 @@ import com.mengchen.webapp.service.BillService;
 import com.mengchen.webapp.service.FileService;
 import com.mengchen.webapp.service.UserService;
 import com.mengchen.webapp.utils.ConvertJSON;
+import com.timgroup.statsd.StatsDClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,9 @@ public class FileRestController {
     private static final String[] check = {"image/png","application/pdf","image/jpg", "image/jpeg"};
 
     @Autowired
+    private StatsDClient statsDClient;
+
+    @Autowired
     FileRestController(BillService billService, FileService fileService, UserService userService){
         this.userService = userService;
         this.billService = billService;
@@ -44,6 +48,7 @@ public class FileRestController {
                                              @PathVariable String bill_id,
                                              @RequestParam("file") MultipartFile file) throws JsonProcessingException {
 
+        statsDClient.incrementCounter("endpoint.file.http.post");
         //TODO: check if bill# exist
 
         try{
@@ -93,7 +98,8 @@ public class FileRestController {
     public ResponseEntity<String> findFile(Authentication auth,
                                            @PathVariable String bill_id,
                                            @PathVariable String file_id) throws JsonProcessingException {
-        //TODO: check if the file exist
+
+        statsDClient.incrementCounter("endpoint.file.http.get");
 
         try{
             if(!userService.findByEmail(auth.getName()).getId()
@@ -117,6 +123,7 @@ public class FileRestController {
     public ResponseEntity<String> deleteFile(Authentication auth,
                                              @PathVariable String bill_id,
                                              @PathVariable String file_id){
+        statsDClient.incrementCounter("endpoint.file.http.delete");
 
         try{
             if(!userService.findByEmail(auth.getName()).getId()

@@ -5,6 +5,9 @@ import com.mengchen.webapp.entity.User;
 import com.mengchen.webapp.security.SecurityUtils;
 import com.mengchen.webapp.service.UserService;
 import com.mengchen.webapp.utils.ResponseFilter;
+import com.timgroup.statsd.StatsDClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.logging.Logger;
 
 @Validated
 @RestController
@@ -23,16 +25,21 @@ public class UserRestController {
 
     private UserService userService;
 
-    private Logger logger = Logger.getLogger(getClass().getName());
+
+    private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     @Autowired
     public UserRestController(UserService theUserService){
         this.userService = theUserService;
     }
+    @Autowired
+    private StatsDClient statsDClient;
 
     @GetMapping(value = "/users", produces = "application/json")
     @ResponseBody
     public ResponseEntity<String> getUsers() {
+
+        statsDClient.incrementCounter("endpoint.user.http.getAll");
 
         List<User> listUser = userService.listAllUser();
 
@@ -45,6 +52,7 @@ public class UserRestController {
     @ResponseBody
     public ResponseEntity<String> getUser( Authentication auth) throws JsonProcessingException{
 
+        statsDClient.incrementCounter("endpoint.user.http.get");
 
         User user = userService.findByEmail(auth.getName());
 
@@ -56,7 +64,9 @@ public class UserRestController {
     @ResponseBody
     public ResponseEntity<String> addUser(@RequestBody @Valid User theUser) throws JsonProcessingException{
 
+        long startTime = System.currentTimeMillis();
 //        // check if the email follow the rules
+        statsDClient.incrementCounter("endpoint.user.http.post");
 
         logger.info(">>>>>> Details=" + theUser.toString());
 
@@ -67,17 +77,21 @@ public class UserRestController {
         User user = userService.findByEmail(theUser.getEmail());
 
         if(user != null){
+            logger.error("endpoint.user.http.post" + "HttpStatus.BAD_REQUEST");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sry, This Email Address (Username) already exist!");
         }
 
         userService.createUser(theUser);
 
+        statsDClient.recordExecutionTimeToNow("CreateUserLatency", startTime);
         return ResponseEntity.status(HttpStatus.CREATED).body(filterPassword(theUser));
     }
 
     @PutMapping("/user/self")
     @ResponseBody
     public ResponseEntity<String> updateUser(@RequestBody @Valid User theUser,Authentication auth) throws JsonProcessingException{
+        statsDClient.incrementCounter("endpoint.user.http.update");
+
         if(theUser.getId() != null
                 || theUser.getCreatedTime() != null
                 || theUser.getUpdateTime() != null){
@@ -120,6 +134,8 @@ public class UserRestController {
 
     @DeleteMapping("/user/{email}")
     public String deleteUser(@PathVariable String email){
+        statsDClient.incrementCounter("endpoint.user.http.delete");
+
         User theUser = userService.findByEmail(email);
 
         if(theUser == null){

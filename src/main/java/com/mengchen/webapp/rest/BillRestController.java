@@ -8,6 +8,7 @@ import com.mengchen.webapp.security.SecurityUtils;
 import com.mengchen.webapp.service.BillService;
 import com.mengchen.webapp.service.UserService;
 import com.mengchen.webapp.utils.ConvertJSON;
+import com.timgroup.statsd.StatsDClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,9 @@ public class BillRestController {
 
     private BillService billService;
     private UserService userService;
+    private final static Logger logger = LoggerFactory.getLogger(BillRestController.class);
+    @Autowired
+    private StatsDClient statsDClient;
 
 
     @Autowired
@@ -44,11 +48,15 @@ public class BillRestController {
     @GetMapping("/bills")
     @ResponseBody
     public ResponseEntity<String> getBills(Authentication auth){
+        statsDClient.incrementCounter("endpoint.bill.http.getAll");
         User theUser = userService.findByEmail(auth.getName());
         List<Bill> theBills = billService.findAllBills(theUser);
+        logger.info(">>>>>>> GET USR : " + "Get all users");
         try{
+
             return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theBills));
         }catch (JsonProcessingException je){
+            logger.error("endpoint.bill.http.getAll - INTERNAL_SERVER_ERROR");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(je.getMessage());
         }
     }
@@ -57,11 +65,12 @@ public class BillRestController {
     @ResponseBody
     public ResponseEntity<String> createBill(Authentication auth,
                                              @RequestBody Bill theBill){
-
+        statsDClient.incrementCounter("endpoint.bill.http.post");
         if(theBill.getBill_id()!= null
             || theBill.getCreated_ts() != null
             || theBill.getUpdated_ts() != null
             || theBill.getOwner_id() != null){
+            logger.error("endpoint.bill.http.post - HttpStatus.BAD_REQUEST");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You input some field that are not allowed to be modified.");
         }
 
@@ -70,8 +79,11 @@ public class BillRestController {
         billService.createBill(theBill);
 
         try{
+            logger.info(">>>>>>> CREATE USR : " + "bill created");
             return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theBill));
+
         }catch (JsonProcessingException je){
+            logger.error("endpoint.bill.http.post - HttpStatus.INTERNAL_SERVER_ERROR");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(je.getMessage());
         }
     }
@@ -80,6 +92,7 @@ public class BillRestController {
     public ResponseEntity<String> deleteBill(Authentication auth,
                                              @PathVariable String bill_id)  {
 
+        statsDClient.incrementCounter("endpoint.bill.http.delete");
 
         Bill theBill = billService.findBill(bill_id);
 
@@ -89,6 +102,7 @@ public class BillRestController {
         String userId = userService.findByEmail(auth.getName()).getId();
 
         if(!theBill.getOwner_id().equals(userId)){
+            logger.error("endpoint.bill.http.delete - HttpStatus.UNAUTHORIZED");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sorry you only delete bills belongs to you");
         }
 
@@ -107,6 +121,8 @@ public class BillRestController {
     @GetMapping("/bill/{bill_id}")
     public ResponseEntity<String> getBill(Authentication auth,
                                           @PathVariable String bill_id){
+        statsDClient.incrementCounter("endpoint.bill.http.get");
+
         Bill theBill = billService.findBill(bill_id);
 
         if(theBill == null)
@@ -132,6 +148,7 @@ public class BillRestController {
     public ResponseEntity<String> updateBill(Authentication auth,
                                            @PathVariable String bill_id,
                                              @RequestBody Bill theBill){
+        statsDClient.incrementCounter("endpoint.bill.http.update");
 
         Bill checkBill = billService.findBill(bill_id);
         if(checkBill == null){
