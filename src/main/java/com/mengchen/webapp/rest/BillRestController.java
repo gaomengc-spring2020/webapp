@@ -84,15 +84,6 @@ public class BillRestController {
 
         billService.createBill(theBill);
 
-        try{
-            logger.info(">>>>>>> CREATE USR : " + "bill created");
-            return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theBill));
-
-        }catch (JsonProcessingException je){
-            logger.error("endpoint.bill.http.post - HttpStatus.INTERNAL_SERVER_ERROR");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(je.getMessage());
-        }
-
         DatagramSocket serverSocket = null;
         try {
             serverSocket = new DatagramSocket(8125);
@@ -107,6 +98,17 @@ public class BillRestController {
         }
         String sentence = new String(receivePacket.getData());
         System.out.println("RECEIVED: " + sentence);
+
+        try{
+            logger.info(">>>>>>> CREATE USR : " + "bill created");
+            return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theBill));
+
+        }catch (JsonProcessingException je){
+            logger.error("endpoint.bill.http.post - HttpStatus.INTERNAL_SERVER_ERROR");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(je.getMessage());
+        }
+
+
 
     }
 
