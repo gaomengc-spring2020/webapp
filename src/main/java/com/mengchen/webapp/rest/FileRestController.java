@@ -21,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static com.mengchen.webapp.utils.StatsDCheckPoint.StatsDCheckPoint;
 
 @Validated
 @RestController
@@ -89,7 +88,8 @@ public class FileRestController {
 
         logger.info(">>>> POST file: (theBill) " + ConvertJSON.ConvertToJSON(theBill));
 
-        StatsDCheckPoint("endpoint.file.http.attachFile",startTime);
+        statsDClient.recordExecutionTimeToNow("endpoint.file.http.attachFile.Timer", startTime);
+        statsDClient.incrementCounter("endpoint.file.http.attachFile");
 
         return ResponseEntity.status(HttpStatus.CREATED).body( ConvertJSON.ConvertToJSON(theBill));
     }
@@ -115,7 +115,8 @@ public class FileRestController {
 
         if(theFile == null ) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no such file");
 
-        StatsDCheckPoint("endpoint.file.http.findFile",startTime);
+        statsDClient.recordExecutionTimeToNow("endpoint.file.http.findFile.Timer", startTime);
+        statsDClient.incrementCounter("endpoint.file.http.findFile");
 
         return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theFile));
     }
@@ -146,7 +147,9 @@ public class FileRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No such file for this bill");
         }
 
-        StatsDCheckPoint("endpoint.file.http.deleteFile",startTime);
+        statsDClient.recordExecutionTimeToNow("endpoint.file.http.deleteFile.Timer", startTime);
+        statsDClient.incrementCounter("endpoint.file.http.deleteFile");
+
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
 

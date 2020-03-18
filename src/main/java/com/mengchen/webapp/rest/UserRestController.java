@@ -19,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.mengchen.webapp.utils.StatsDCheckPoint.StatsDCheckPoint;
-
 @Validated
 @RestController
 @ComponentScan(basePackages = "com.mengchen.webapp")
@@ -47,7 +45,9 @@ public class UserRestController {
 
         List<User> listUser = userService.listAllUser();
 
-        StatsDCheckPoint("endpoint.user.http.getUsers",startTime);
+        statsDClient.recordExecutionTimeToNow("endpoint.user.http.getUsers.Timer", startTime);
+        statsDClient.incrementCounter("endpoint.user.http.getUsers");
+
         return ResponseEntity.status(HttpStatus.OK).body(listUser.toString());
     }
 
@@ -62,7 +62,8 @@ public class UserRestController {
 
         String filter = filterPassword(user);
 
-        StatsDCheckPoint("endpoint.user.http.getUser",startTime);
+        statsDClient.recordExecutionTimeToNow("endpoint.user.http.getUser.Timer", startTime);
+        statsDClient.incrementCounter("endpoint.user.http.getUser");
         return ResponseEntity.status(HttpStatus.OK).body(filter);
     }
 
@@ -87,7 +88,9 @@ public class UserRestController {
 
         userService.createUser(theUser);
 
-        StatsDCheckPoint("endpoint.user.http.addUser",startTime);
+
+        statsDClient.recordExecutionTimeToNow("endpoint.user.http.addUser.Timer", startTime);
+        statsDClient.incrementCounter("endpoint.user.http.addUser");
         return ResponseEntity.status(HttpStatus.CREATED).body(filterPassword(theUser));
     }
 
@@ -133,8 +136,9 @@ public class UserRestController {
         userService.updateUser(updateUser);
 
         String filter = filterPassword(updateUser);
-        StatsDCheckPoint("endpoint.user.http.updateUser",startTime);
 
+        statsDClient.recordExecutionTimeToNow("endpoint.user.http.updateUser.Timer", startTime);
+        statsDClient.incrementCounter("endpoint.user.http.updateUser");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(filter);
     }
 
@@ -153,7 +157,10 @@ public class UserRestController {
         }
 
         userService.deleteUser(email);
-        StatsDCheckPoint("endpoint.user.http.deleteUser",startTime);
+
+        statsDClient.recordExecutionTimeToNow("endpoint.user.http.deleteUser.Timer", startTime);
+        statsDClient.incrementCounter("endpoint.user.http.deleteUser");
+
         return "User " + theUser.getLastName() + " has been deleted";
 
     }

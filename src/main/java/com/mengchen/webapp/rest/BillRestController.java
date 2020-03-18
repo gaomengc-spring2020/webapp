@@ -2,9 +2,7 @@ package com.mengchen.webapp.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mengchen.webapp.entity.Bill;
-import com.mengchen.webapp.entity.File;
 import com.mengchen.webapp.entity.User;
-import com.mengchen.webapp.security.SecurityUtils;
 import com.mengchen.webapp.service.BillService;
 import com.mengchen.webapp.service.UserService;
 import com.mengchen.webapp.utils.ConvertJSON;
@@ -16,22 +14,10 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
-
-import static com.mengchen.webapp.utils.StatsDCheckPoint.StatsDCheckPoint;
 
 @Validated
 @RestController
@@ -45,7 +31,6 @@ public class BillRestController {
 
     @Autowired
     private StatsDClient statsDClient;
-
 
     @Autowired
     public BillRestController(BillService billService, UserService userService){
@@ -64,8 +49,8 @@ public class BillRestController {
         List<Bill> theBills = billService.findAllBills(theUser);
         logger.info(">>>>>>> GET USR : " + "Get all users");
 
-        StatsDCheckPoint("endpoint.bill.http.getBills",startTime);
-
+        statsDClient.recordExecutionTimeToNow("endpoint.bill.http.getBills.Timer", startTime);
+        statsDClient.incrementCounter("endpoint.bill.http.getBills");
         try{
             return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theBills));
         }catch (JsonProcessingException je){
@@ -91,9 +76,8 @@ public class BillRestController {
         theBill.setOwner_id(userService.findByEmail(auth.getName()).getId());
 
         billService.createBill(theBill);
-
-        StatsDCheckPoint("endpoint.bill.http.createBill",startTime);
-
+        statsDClient.recordExecutionTimeToNow("endpoint.bill.http.createBill.Timer", startTime);
+        statsDClient.incrementCounter("endpoint.bill.http.createBill");
         try{
             logger.info(">>>>>>> CREATE USR : " + "bill created");
             return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theBill));
@@ -125,7 +109,8 @@ public class BillRestController {
 
         billService.deleteBill(bill_id);
 
-        StatsDCheckPoint("endpoint.bill.http.deleteBill",startTime);
+        statsDClient.recordExecutionTimeToNow("endpoint.bill.http.deleteBill.Timer", startTime);
+        statsDClient.incrementCounter("endpoint.bill.http.deleteBill");
 
         try{
             String response = "This Bill has been deleted : /n" + ConvertJSON.ConvertToJSON(theBill);
@@ -153,8 +138,9 @@ public class BillRestController {
         if(!theBill.getOwner_id().equals(userId)){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sorry you can only get bills belongs to you");
         }
-        StatsDCheckPoint("endpoint.bill.http.getBill",startTime);
 
+        statsDClient.recordExecutionTimeToNow("endpoint.bill.http.getBill.Timer", startTime);
+        statsDClient.incrementCounter("endpoint.bill.http.getBill");
         try{
             return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theBill));
 
@@ -199,7 +185,9 @@ public class BillRestController {
 
         billService.updateBill(checkBill);
 
-        StatsDCheckPoint("endpoint.bill.http.updateBill",startTime);
+        statsDClient.recordExecutionTimeToNow("endpoint.bill.http.updateBill.Timer", startTime);
+        statsDClient.incrementCounter("endpoint.bill.http.updateBill");
+
 
         try{
             return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(checkBill));
