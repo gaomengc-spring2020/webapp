@@ -8,6 +8,7 @@ import com.mengchen.webapp.entity.File;
 import com.mengchen.webapp.exceptions.FileStorageException;
 import com.mengchen.webapp.repository.BillRepository;
 import com.mengchen.webapp.repository.FileRepository;
+import com.timgroup.statsd.StatsDClient;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.EnumSet;
 
-import static com.mengchen.webapp.utils.StatsDCheckPoint.StatsDCheckPoint;
 
 @Repository
 public class FileDAOImpl implements FileDAO{
@@ -50,6 +49,10 @@ public class FileDAOImpl implements FileDAO{
     private String s3BucketUrl;
 
     private EntityManager entityManager;
+
+
+    @Autowired
+    private StatsDClient statsDClient;
 
 
     @Autowired
@@ -97,7 +100,7 @@ public class FileDAOImpl implements FileDAO{
             throw new FileStorageException("Failed to store file " + file.getOriginalFilename(), ex);
         }
 
-        StatsDCheckPoint("s3.service.sevaFile",startTime);
+        statsDClient.recordExecutionTimeToNow("s3.service.saveFile", startTime);
 
         // Check if the file's name contains invalid characters
         if(fileName.contains("..")) {
@@ -129,7 +132,7 @@ public class FileDAOImpl implements FileDAO{
         Session currentSession = entityManager.unwrap(Session.class);
         currentSession.save(theFile);
 
-        StatsDCheckPoint("database.query.uploadFile",startTime);
+        statsDClient.recordExecutionTimeToNow("database.query.uploadFile", startTime);
 
         return theFile;
     }
@@ -142,7 +145,7 @@ public class FileDAOImpl implements FileDAO{
         Query<File> theQuery =
                 currentSession.createQuery("from File where id=:fileId", File.class);
         theQuery.setParameter("fileId", theFileId);
-        StatsDCheckPoint("database.query.findFile",startTime);
+        statsDClient.recordExecutionTimeToNow("database.query.findFile", startTime);
 
         return theQuery.uniqueResultOptional().orElse(null);
     }
@@ -181,7 +184,7 @@ public class FileDAOImpl implements FileDAO{
         s3client.deleteObjects(deleteObjectsRequest);
 
         logger.info(">>>>>> FileDAO: deleteFile in S3: " + "deleted");
-        StatsDCheckPoint("s3.service.deleteFile",startTime);
+        statsDClient.recordExecutionTimeToNow("s3.service.deleteFile", startTime);
 
     }
 

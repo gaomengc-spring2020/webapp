@@ -4,6 +4,7 @@ import com.mengchen.webapp.entity.Authorities;
 import com.mengchen.webapp.entity.User;
 import com.mengchen.webapp.entity.Users;
 import com.mengchen.webapp.security.SecurityUtils;
+import com.timgroup.statsd.StatsDClient;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +14,13 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import java.util.List;
 
-import static com.mengchen.webapp.utils.StatsDCheckPoint.StatsDCheckPoint;
-
 @Repository
 public class UserDAOImpl implements UserDAO {
 
-
     private EntityManager entityManager;
+
+    @Autowired
+    private StatsDClient statsDClient;
 
     @Autowired
     public UserDAOImpl(EntityManager theEntityManager){
@@ -37,7 +38,7 @@ public class UserDAOImpl implements UserDAO {
                 currentSession.createQuery("from User", User.class);
 
         List<User> users = theQuery.getResultList();
-        StatsDCheckPoint("database.query.findAllUser",startTime);
+        statsDClient.recordExecutionTimeToNow("database.query.findAllUser", startTime);
 
         return users;
     }
@@ -52,7 +53,7 @@ public class UserDAOImpl implements UserDAO {
                 currentSession.createQuery("from User where email=:theEmail", User.class);
 
         theQuery.setParameter("theEmail", theEmail);
-        StatsDCheckPoint("database.query.findByEmail",startTime);
+        statsDClient.recordExecutionTimeToNow("database.query.findByEmail", startTime);
 
         return theQuery.uniqueResultOptional().orElse(null);
     }
@@ -75,7 +76,7 @@ public class UserDAOImpl implements UserDAO {
         currentSession.save(theUser);
         currentSession.save(users);
         currentSession.save(authorities);
-        StatsDCheckPoint("database.query.createUser",startTime);
+        statsDClient.recordExecutionTimeToNow("database.query.createUser", startTime);
 
     }
 
@@ -88,7 +89,9 @@ public class UserDAOImpl implements UserDAO {
         theUser.setPassword(SecurityUtils.encode(theUser.getPassword()));
 
         currentSession.update(theUser);
-        StatsDCheckPoint("database.query.updateUser",startTime);
+
+        statsDClient.recordExecutionTimeToNow("database.query.updateUser", startTime);
+
 
     }
 
@@ -102,7 +105,9 @@ public class UserDAOImpl implements UserDAO {
                 currentSession.createQuery("delete from User where email=:theEmail");
         theQuery.setParameter("theEmail", theEmail);
         theQuery.executeUpdate();
-        StatsDCheckPoint("database.query.deleteUser",startTime);
+
+        statsDClient.recordExecutionTimeToNow("database.query.deleteUser", startTime);
+
 
     }
 
