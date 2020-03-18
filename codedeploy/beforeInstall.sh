@@ -8,4 +8,6 @@ else
       sudo systemctl stop tomcat8
 fi
 
-source /env/properties.sh
+# shellcheck disable=SC2164
+cd /opt
+sudo rm /opt/cloudwatch-config.json
