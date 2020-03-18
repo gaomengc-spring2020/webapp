@@ -12,6 +12,7 @@ import com.timgroup.statsd.StatsDClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -29,12 +30,14 @@ import java.util.List;
 
 @Validated
 @RestController
+@ComponentScan(basePackages = "com.mengchen.webapp")
 @RequestMapping("/v1")
 public class BillRestController {
 
     private BillService billService;
     private UserService userService;
     private final static Logger logger = LoggerFactory.getLogger(BillRestController.class);
+
     @Autowired
     private StatsDClient statsDClient;
 
