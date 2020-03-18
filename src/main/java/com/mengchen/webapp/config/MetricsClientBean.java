@@ -18,9 +18,9 @@ public class MetricsClientBean {
 
     @Bean
     public StatsDClient statsDClient(
-            @Value("${metrics.statsd.host}") String host,
-            @Value("${metrics.statsd.port}") int port,
-            @Value("${metrics.prefix}") String prefix
+            @Value("${metrics.statsd.host:localhost}") String host,
+            @Value("${metrics.statsd.port:8125}") int port,
+            @Value("${metrics.prefix:example.app}") String prefix
     ) {
         logger.info(">>>>>>>HOST:" + host);
         logger.info(">>>>>>>Port:" + port);
