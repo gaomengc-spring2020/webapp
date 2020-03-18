@@ -24,22 +24,7 @@ public class WebApplication {
 
 		SpringApplication.run(WebApplication.class, args);
 
-		DatagramSocket serverSocket = null;
-		try {
-			serverSocket = new DatagramSocket(8125);
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
-		while(true) {
-			DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
-			try {
-				serverSocket.receive(receivePacket);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			String sentence = new String(receivePacket.getData());
-			System.out.println("RECEIVED: " + sentence);
-		}
+
 	}
 
 }
