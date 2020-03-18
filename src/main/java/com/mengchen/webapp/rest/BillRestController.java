@@ -31,6 +31,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
+import static com.mengchen.webapp.utils.StatsDCheckPoint.StatsDCheckPoint;
+
 @Validated
 @RestController
 @ComponentScan(basePackages = "com.mengchen.webapp")
@@ -54,12 +56,17 @@ public class BillRestController {
     @GetMapping("/bills")
     @ResponseBody
     public ResponseEntity<String> getBills(Authentication auth){
+
+        long startTime = System.currentTimeMillis();
+
         statsDClient.incrementCounter("endpoint.bill.http.getAll");
         User theUser = userService.findByEmail(auth.getName());
         List<Bill> theBills = billService.findAllBills(theUser);
         logger.info(">>>>>>> GET USR : " + "Get all users");
-        try{
 
+        StatsDCheckPoint("endpoint.bill.http.getBills",startTime);
+
+        try{
             return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theBills));
         }catch (JsonProcessingException je){
             logger.error("endpoint.bill.http.getAll - INTERNAL_SERVER_ERROR");
@@ -71,7 +78,8 @@ public class BillRestController {
     @ResponseBody
     public ResponseEntity<String> createBill(Authentication auth,
                                              @RequestBody Bill theBill){
-        statsDClient.incrementCounter("endpoint.bill.http.post");
+        long startTime = System.currentTimeMillis();
+
         if(theBill.getBill_id()!= null
             || theBill.getCreated_ts() != null
             || theBill.getUpdated_ts() != null
@@ -84,6 +92,7 @@ public class BillRestController {
 
         billService.createBill(theBill);
 
+        StatsDCheckPoint("endpoint.bill.http.createBill",startTime);
 
         try{
             logger.info(">>>>>>> CREATE USR : " + "bill created");
@@ -94,15 +103,13 @@ public class BillRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(je.getMessage());
         }
 
-
-
     }
 
     @DeleteMapping("bill/{bill_id}")
     public ResponseEntity<String> deleteBill(Authentication auth,
                                              @PathVariable String bill_id)  {
 
-        statsDClient.incrementCounter("endpoint.bill.http.delete");
+        long startTime = System.currentTimeMillis();
 
         Bill theBill = billService.findBill(bill_id);
 
@@ -118,6 +125,8 @@ public class BillRestController {
 
         billService.deleteBill(bill_id);
 
+        StatsDCheckPoint("endpoint.bill.http.deleteBill",startTime);
+
         try{
             String response = "This Bill has been deleted : /n" + ConvertJSON.ConvertToJSON(theBill);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
@@ -131,7 +140,7 @@ public class BillRestController {
     @GetMapping("/bill/{bill_id}")
     public ResponseEntity<String> getBill(Authentication auth,
                                           @PathVariable String bill_id){
-        statsDClient.incrementCounter("endpoint.bill.http.get");
+        long startTime = System.currentTimeMillis();
 
         Bill theBill = billService.findBill(bill_id);
 
@@ -144,6 +153,7 @@ public class BillRestController {
         if(!theBill.getOwner_id().equals(userId)){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sorry you can only get bills belongs to you");
         }
+        StatsDCheckPoint("endpoint.bill.http.getBill",startTime);
 
         try{
             return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theBill));
@@ -158,7 +168,7 @@ public class BillRestController {
     public ResponseEntity<String> updateBill(Authentication auth,
                                            @PathVariable String bill_id,
                                              @RequestBody Bill theBill){
-        statsDClient.incrementCounter("endpoint.bill.http.update");
+        long startTime = System.currentTimeMillis();
 
         Bill checkBill = billService.findBill(bill_id);
         if(checkBill == null){
@@ -188,6 +198,9 @@ public class BillRestController {
         checkBill.setPayment_status(theBill.getPayment_status());
 
         billService.updateBill(checkBill);
+
+        StatsDCheckPoint("endpoint.bill.http.updateBill",startTime);
+
         try{
             return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(checkBill));
 
