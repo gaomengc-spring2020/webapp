@@ -84,20 +84,6 @@ public class BillRestController {
 
         billService.createBill(theBill);
 
-        DatagramSocket serverSocket = null;
-        try {
-            serverSocket = new DatagramSocket(8125);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
-        DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
-        try {
-            serverSocket.receive(receivePacket);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String sentence = new String(receivePacket.getData());
-        System.out.println("RECEIVED: " + sentence);
 
         try{
             logger.info(">>>>>>> CREATE USR : " + "bill created");
