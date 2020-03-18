@@ -4,6 +4,8 @@
   files:
     - source: ./webapp.jar
       destination: /home/
+    - source: ./cloudwatch-config.json
+      destination: /opt/
   hooks:
     AfterInstall:
       - location: ./codedeploy/afterInstall.sh
