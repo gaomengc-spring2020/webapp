@@ -23,6 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -81,6 +84,21 @@ public class BillRestController {
 
         billService.createBill(theBill);
 
+        DatagramSocket serverSocket = null;
+        try {
+            serverSocket = new DatagramSocket(8125);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
+        try {
+            serverSocket.receive(receivePacket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String sentence = new String(receivePacket.getData());
+        System.out.println("RECEIVED: " + sentence);
+
         try{
             logger.info(">>>>>>> CREATE USR : " + "bill created");
             return ResponseEntity.status(HttpStatus.OK).body(ConvertJSON.ConvertToJSON(theBill));
@@ -89,6 +107,9 @@ public class BillRestController {
             logger.error("endpoint.bill.http.post - HttpStatus.INTERNAL_SERVER_ERROR");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(je.getMessage());
         }
+
+
+
     }
 
     @DeleteMapping("bill/{bill_id}")
