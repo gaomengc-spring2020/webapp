@@ -9,6 +9,7 @@ import com.timgroup.statsd.StatsDClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Validated
 @RestController
+@ComponentScan(basePackages = "com.mengchen.webapp")
 @RequestMapping("/v1")
 public class UserRestController {
 
@@ -32,6 +34,7 @@ public class UserRestController {
     public UserRestController(UserService theUserService){
         this.userService = theUserService;
     }
+
     @Autowired
     private StatsDClient statsDClient;
 
