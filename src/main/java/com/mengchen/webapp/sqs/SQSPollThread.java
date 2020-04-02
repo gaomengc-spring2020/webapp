@@ -17,7 +17,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Map;
 
-@Repository
 public class SQSPollThread implements Runnable {
 
     @Value("${aws.sqs.queue.name}")
