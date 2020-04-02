@@ -19,11 +19,11 @@ import java.util.Map;
 @Repository
 public class SQSPollThread implements Runnable {
 
-//    @Value("${aws.sqs.queue.name}")
-    String AWS_SQS_QUEUE_NAME = "test2";
+    @Value("${aws.sqs.queue.name}")
+    String AWS_SQS_QUEUE_NAME;
 
-//    @Value("${aws.sns.topic.arn}")
-    String AWS_SNS_TOPIC_ARN = "arn:aws:sns:us-east-1:724963175368:test";
+    @Value("${aws.sns.topic.arn}")
+    String AWS_SNS_TOPIC_ARN;
 
     private final org.jboss.logging.Logger logger = org.jboss.logging.Logger.getLogger(org.jboss.logging.Logger.class);
 
