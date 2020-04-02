@@ -12,11 +12,11 @@ import java.util.*;
 @Repository
 public class SQSMessageSending {
 
-    @Value("${aws.sqs.queue.name}")
-    String AWS_SQS_QUEUE_NAME;
+//    @Value("${aws.sqs.queue.name}")
+    String AWS_SQS_QUEUE_NAME = "SQSQueueA10";
 
-    @Value("${domain}")
-    String DOMAIN ;
+//    @Value("${domain}")
+    String DOMAIN = "test@prod.mengchen-gao.me" ;
 
 
     final AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
