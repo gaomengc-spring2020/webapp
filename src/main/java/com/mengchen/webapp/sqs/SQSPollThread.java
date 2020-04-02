@@ -33,9 +33,9 @@ public class SQSPollThread implements Runnable {
     public void run() {
 
         if(AWS_SQS_QUEUE_NAME == null){
-            AWS_SQS_QUEUE_NAME = "AWS_SQS_QUEUE_NAME";
+            AWS_SQS_QUEUE_NAME = "null ai";
         }
-        logger.info("*************" + AWS_SQS_QUEUE_NAME);
+        logger.info(">>>>>>>>> AWS_SQS_QUEUE_NAME : " + AWS_SQS_QUEUE_NAME);
 
         AmazonSQS sqs = AmazonSQSClientBuilder
                                         .standard()
