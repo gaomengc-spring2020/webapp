@@ -5,6 +5,7 @@ import com.mengchen.webapp.entity.Bill;
 import com.mengchen.webapp.entity.User;
 import com.mengchen.webapp.service.BillService;
 import com.mengchen.webapp.service.UserService;
+import com.mengchen.webapp.sqs.SQSMessageSending;
 import com.mengchen.webapp.utils.ConvertJSON;
 import com.timgroup.statsd.StatsDClient;
 import org.slf4j.Logger;
@@ -57,6 +58,27 @@ public class BillRestController {
             logger.error("endpoint.bill.http.getAll - INTERNAL_SERVER_ERROR");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(je.getMessage());
         }
+    }
+
+    @GetMapping("/bills/due/{due_in}")
+    @ResponseBody
+    public ResponseEntity<String> getDueBills(Authentication auth,
+                                                @PathVariable int due_in){
+        long startTime = System.currentTimeMillis();
+        statsDClient.incrementCounter("endpoint.bill.http.getDueBill");
+
+        User theUser = userService.findByEmail(auth.getName());
+        List<Bill> theBills = billService.findAllDueBills(theUser, due_in);
+
+        //sent msg to SQS
+        new SQSMessageSending().sqsSendMsg(theBills, due_in, theUser.getEmail());
+
+        logger.info(">>>>>>>> Find All bills : " + theBills.toString());
+
+        statsDClient.recordExecutionTimeToNow("endpoint.bill.http.getBills.Timer", startTime);
+        statsDClient.incrementCounter("endpoint.bill.http.getBills");
+
+        return ResponseEntity.status(HttpStatus.OK).body("You'll get email for details soon.");
     }
 
     @PostMapping("/bill")

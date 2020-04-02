@@ -56,4 +56,9 @@ public class BillServiceImpl implements BillService{
     public Bill uploadAttachment(Bill theBill) {
         return billDAO.uploadAttachment(theBill);
     }
+
+    @Override
+    public List<Bill> findAllDueBills(User theUser, int due_in) {
+        return billDAO.findAllDueBills(theUser, due_in);
+    }
 }

@@ -7,8 +7,6 @@ public class ConvertJSON {
 
     public static String ConvertToJSON(Object response) throws JsonProcessingException{
         ObjectMapper obj = new ObjectMapper();
-
         return obj.writeValueAsString(response);
-
     }
 }

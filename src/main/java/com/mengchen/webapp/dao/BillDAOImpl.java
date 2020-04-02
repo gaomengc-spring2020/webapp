@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -140,6 +143,24 @@ public class BillDAOImpl implements BillDAO{
             e.printStackTrace();
         }
         return findBill(theBill.getBill_id());
+    }
+
+    @Override
+    public List<Bill> findAllDueBills(User theUser, int due_in) {
+
+        List<Bill> allBills = findAllBills(theUser);
+
+        List<Bill> dueBills = new ArrayList<>();
+
+        allBills.forEach(bill -> {
+            LocalDate now = LocalDate.now();
+            LocalDate dueDate = LocalDate.parse(bill.getDue_date());
+            if(ChronoUnit.DAYS.between(now, dueDate) <= due_in){
+                dueBills.add(bill);
+            }
+        });
+
+        return dueBills;
     }
 
 }

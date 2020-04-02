@@ -28,9 +28,6 @@ import java.security.NoSuchAlgorithmException;
 @Repository
 public class FileDAOImpl implements FileDAO{
 
-//    @Autowired
-//    Environment env;
-
     @Autowired
     FileRepository fileRepository;
 
