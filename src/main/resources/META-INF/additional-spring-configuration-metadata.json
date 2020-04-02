@@ -39,5 +39,20 @@
       "name": "aws.region",
       "type": "java.lang.String",
       "description": "Description for aws.region."
+    },
+    {
+      "name": "aws.sqs.queue.name",
+      "type": "java.lang.String",
+      "description": "Description for aws.sqs.queue.name."
+    },
+    {
+      "name": "aws.sns.topic.arn",
+      "type": "java.lang.String",
+      "description": "Description for aws.sns.topic.arn."
+    },
+    {
+      "name": "domain",
+      "type": "java.lang.String",
+      "description": "Description for domain."
     }
   ] }

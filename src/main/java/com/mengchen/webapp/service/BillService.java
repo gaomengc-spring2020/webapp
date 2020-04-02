@@ -2,7 +2,6 @@ package com.mengchen.webapp.service;
 
 
 import com.mengchen.webapp.entity.Bill;
-import com.mengchen.webapp.entity.File;
 import com.mengchen.webapp.entity.User;
 
 import java.util.List;
@@ -24,4 +23,6 @@ public interface BillService {
     void updateBill(Bill theBill);
 
     Bill uploadAttachment(Bill theBill);
+
+    List<Bill> findAllDueBills(User theUser, int due_in);
 }

@@ -27,4 +27,5 @@ public interface BillDAO {
 
     Bill uploadAttachment(Bill theBill);
 
+    List<Bill> findAllDueBills(User theUser, int due_in);
 }
