@@ -69,11 +69,11 @@ public class BillRestController {
 
         User theUser = userService.findByEmail(auth.getName());
         List<Bill> theBills = billService.findAllDueBills(theUser, due_in);
+        logger.info(">>>>>>>> Find All bills : " + theBills.toString());
 
         //sent msg to SQS
         new SQSMessageSending().sqsSendMsg(theBills, due_in, theUser.getEmail());
 
-        logger.info(">>>>>>>> Find All bills : " + theBills.toString());
 
         statsDClient.recordExecutionTimeToNow("endpoint.bill.http.getBills.Timer", startTime);
         statsDClient.incrementCounter("endpoint.bill.http.getBills");
