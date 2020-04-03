@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
-@Repository
 public class SQSMessageSending {
 
 //    @Value("${aws.sqs.queue.name}")

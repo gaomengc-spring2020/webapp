@@ -17,11 +17,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Map;
 
-@Repository
 public class SQSPollThread implements Runnable {
 
-    @Value("${aws.sqs.queue.name}")
-    String AWS_SQS_QUEUE_NAME;
+//    @Value("${aws.sqs.queue.name}")
+    String AWS_SQS_QUEUE_NAME= "SQSQueueA10";
 
 //    @Value("${aws.sns.topic.arn}")
     String AWS_SNS_TOPIC_ARN = "arn:aws:sns:us-east-1:469580218939:SNSTopicA10";
@@ -33,9 +32,9 @@ public class SQSPollThread implements Runnable {
     public void run() {
 
         if(AWS_SQS_QUEUE_NAME == null){
-            AWS_SQS_QUEUE_NAME = "AWS_SQS_QUEUE_NAME";
+            AWS_SQS_QUEUE_NAME = "null ai";
         }
-        logger.info("*************" + AWS_SQS_QUEUE_NAME);
+        logger.info(">>>>>>>>> AWS_SQS_QUEUE_NAME : " + AWS_SQS_QUEUE_NAME);
 
         AmazonSQS sqs = AmazonSQSClientBuilder
                                         .standard()
