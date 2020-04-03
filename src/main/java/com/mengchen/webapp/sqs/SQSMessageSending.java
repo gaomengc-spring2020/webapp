@@ -15,7 +15,7 @@ public class SQSMessageSending {
     String AWS_SQS_QUEUE_NAME = "SQSQueueA10";
 
 //    @Value("${domain}")
-    String DOMAIN = "test@prod.mengchen-gao.me" ;
+    String DOMAIN = "prod.mengchen-gao.me" ;
 
 
     final AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
