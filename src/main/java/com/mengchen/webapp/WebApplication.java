@@ -18,7 +18,7 @@ public class WebApplication {
 		new Thread(new SQSPollThread()).start();
 
 		System.out.println(System.getenv("RDS_MYSQL_DB_HOST"));
-//		SpringApplication.run(WebApplication.class, args);
+		SpringApplication.run(WebApplication.class, args);
 
 		// run sqs tread in background
 
