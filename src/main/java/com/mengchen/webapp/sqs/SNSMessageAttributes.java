@@ -14,6 +14,7 @@ public class SNSMessageAttributes {
 
     private String message;
     private Map<String, MessageAttributeValue> messageAttributes;
+    private final org.jboss.logging.Logger logger = org.jboss.logging.Logger.getLogger(SNSMessageAttributes.class);
 
     public SNSMessageAttributes(final String message) {
         this.message = message;
@@ -62,8 +63,16 @@ public class SNSMessageAttributes {
     }
 
     public PublishResult publish( AmazonSNS snsClient,  String topicArn) {
+        logger.info("snsClinet  -  " + snsClient.toString());
+        logger.info("topicArn  -  " + topicArn.toString());
+
+        logger.info("before - PublishRequest  -  ");
+
         final PublishRequest request = new PublishRequest(topicArn, message)
                 .withMessageAttributes(messageAttributes);
+        logger.info("after - PublishRequest  -  " + messageAttributes);
+
+
         return snsClient.publish(request);
     }
 }
