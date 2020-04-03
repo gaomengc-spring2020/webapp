@@ -31,20 +31,21 @@ public class SQSPollThread implements Runnable {
         if(AWS_SQS_QUEUE_NAME == null){
             AWS_SQS_QUEUE_NAME = "null ai";
         }
-        logger.info(">>>>>>>>> AWS_SQS_QUEUE_NAME : " + AWS_SQS_QUEUE_NAME);
+        logger.info("SQSPollThread - AWS_SQS_QUEUE_NAME : " + AWS_SQS_QUEUE_NAME);
 
         AmazonSQS sqs = AmazonSQSClientBuilder
                                         .standard()
                                         .withRegion(Regions.US_EAST_1)
                                         .withCredentials(new InstanceProfileCredentialsProvider(false))
                                         .build();
-
+        logger.info("SQSPollThread - sqs" + sqs.toString());
 
         AmazonSNS sns = AmazonSNSClientBuilder
                                         .standard()
                                         .withRegion(Regions.US_EAST_1)
                                         .withCredentials(new InstanceProfileCredentialsProvider(false))
                                         .build();
+        logger.info("SQSPollThread - sns" + sns.toString());
 
         String AWS_SQS_QUEUE_URL = sqs.getQueueUrl(AWS_SQS_QUEUE_NAME).getQueueUrl();
 
@@ -56,29 +57,33 @@ public class SQSPollThread implements Runnable {
                     .withMaxNumberOfMessages(10)
                     .withWaitTimeSeconds(20);
 
+
             List<Message> messages = sqs.receiveMessage(receive_request).getMessages();
             // Publish a message to an Amazon SNS topic.
+            logger.info("SQSPollThread - msg" + messages.toString());
+
             for (Message msg : messages){
+                logger.info("SQSPollThread - loop" );
 
                 SNSMessageAttributes snsMsgAttr = new SNSMessageAttributes(msg.getBody());
 
                 Map<String, MessageAttributeValue> sqsAttrMap = msg.getMessageAttributes();
-                System.out.println(">>>>>>>>  " +  sqsAttrMap.size());
+                logger.info("SQSPollThread - sqsAttrMap  " +  sqsAttrMap.size());
 
                 Map<String,String> sqsAttr= msg.getAttributes();
 
-                System.out.println(">>>>>>>>  " +  sqsAttr.toString());
+                logger.info("SQSPollThread - sqsAttr  " +  sqsAttr.toString());
 
                 snsMsgAttr.addAttribute("User",sqsAttrMap.get("User").getStringValue());
                 snsMsgAttr.addAttribute("Due_in", sqsAttrMap.get("Due_in").getStringValue());
 
-                System.out.println(">>>>>>>>  " + snsMsgAttr.getMessage());
+                logger.info("SQSPollThread - snsMsgAttr  " + snsMsgAttr.getMessage());
 
                 PublishResult publishResponse = snsMsgAttr.publish(sns, AWS_SNS_TOPIC_ARN);
-                logger.info(">>>>>>  MessageId: " + publishResponse.getMessageId());
+                logger.info("SQSPollThread - MessageId: " + publishResponse.getMessageId());
 
                 sqs.deleteMessage(AWS_SQS_QUEUE_URL, msg.getReceiptHandle());
-                logger.info(">>>>>>  Deleted Msg from SQS queue: " + publishResponse.getMessageId());
+                logger.info("SQSPollThread - Deleted Msg from SQS queue: " + publishResponse.getMessageId());
 
             }
         }
