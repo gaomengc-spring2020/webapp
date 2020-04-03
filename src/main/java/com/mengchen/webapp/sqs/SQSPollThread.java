@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class SQSPollThread implements Runnable {
 
-    @Value("${aws.sqs.queue.name}")
+//    @Value("${aws.sqs.queue.name}")
     String AWS_SQS_QUEUE_NAME= "SQSQueueA10";
 
 //    @Value("${aws.sns.topic.arn}")
@@ -39,14 +39,14 @@ public class SQSPollThread implements Runnable {
         AmazonSQS sqs = AmazonSQSClientBuilder
                                         .standard()
                                         .withRegion(Regions.US_EAST_1)
-//                                        .withCredentials(new InstanceProfileCredentialsProvider(false))
+                                        .withCredentials(new InstanceProfileCredentialsProvider(false))
                                         .build();
 
 
         AmazonSNS sns = AmazonSNSClientBuilder
                                         .standard()
                                         .withRegion(Regions.US_EAST_1)
-//                                        .withCredentials(new InstanceProfileCredentialsProvider(false))
+                                        .withCredentials(new InstanceProfileCredentialsProvider(false))
                                         .build();
 
         String AWS_SQS_QUEUE_URL = sqs.getQueueUrl(AWS_SQS_QUEUE_NAME).getQueueUrl();
