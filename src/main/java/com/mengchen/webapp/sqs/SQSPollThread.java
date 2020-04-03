@@ -20,7 +20,7 @@ import java.util.Map;
 public class SQSPollThread implements Runnable {
 
     @Value("${aws.sqs.queue.name}")
-    String AWS_SQS_QUEUE_NAME;
+    String AWS_SQS_QUEUE_NAME= "SQSQueueA10";
 
 //    @Value("${aws.sns.topic.arn}")
     String AWS_SNS_TOPIC_ARN = "arn:aws:sns:us-east-1:469580218939:SNSTopicA10";
