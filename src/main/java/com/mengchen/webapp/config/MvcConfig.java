@@ -32,8 +32,8 @@ public class MvcConfig {
     @Bean
     public DataSource securityDataSource() {
 
-        System.setProperty("javax.net.ssl.trustStore","/home/clientkeystore");
-        System.setProperty("javax.net.ssl.trustStorePassword", "woshengri");
+//        System.setProperty("javax.net.ssl.trustStore","/home/clientkeystore");
+//        System.setProperty("javax.net.ssl.trustStorePassword", "woshengri");
 
         ComboPooledDataSource securityDataSource = new ComboPooledDataSource();
 
@@ -47,9 +47,9 @@ public class MvcConfig {
         logger.info(">>>>>> jdbc.user=" + env.getProperty("spring.datasource.username"));
 
         // set database connection props
-        Properties properties = new Properties();
-        properties.setProperty("sslMode","VERIFY_IDENTITY");
-        securityDataSource.setProperties(properties);
+//        Properties properties = new Properties();
+//        properties.setProperty("sslMode","VERIFY_IDENTITY");
+//        securityDataSource.setProperties(properties);
         securityDataSource.setJdbcUrl(env.getProperty("spring.datasource.url"));
         securityDataSource.setUser(env.getProperty("spring.datasource.username"));
         securityDataSource.setPassword(env.getProperty("spring.datasource.password"));
