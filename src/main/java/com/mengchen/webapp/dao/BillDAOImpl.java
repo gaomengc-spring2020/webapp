@@ -70,7 +70,6 @@ public class BillDAOImpl implements BillDAO{
         theQuery.setParameter("ownerId", ownerId);
         statsDClient.recordExecutionTimeToNow("database.query.findAllBill", startTime);
 
-
         List<Bill> bills = theQuery.getResultList();
 
         return bills;
@@ -155,7 +154,8 @@ public class BillDAOImpl implements BillDAO{
         allBills.forEach(bill -> {
             LocalDate now = LocalDate.now();
             LocalDate dueDate = LocalDate.parse(bill.getDue_date());
-            if(ChronoUnit.DAYS.between(dueDate, now) <= due_in){
+
+            if(ChronoUnit.DAYS.between(dueDate,now) <= due_in){
                 dueBills.add(bill);
             }
         });

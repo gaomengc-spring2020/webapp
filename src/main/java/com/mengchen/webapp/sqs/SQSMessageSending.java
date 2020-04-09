@@ -12,7 +12,7 @@ import java.util.*;
 public class SQSMessageSending {
 
 //    @Value("${aws.sqs.queue.name}")
-    String AWS_SQS_QUEUE_NAME = "SQSQueueA10";
+    String AWS_SQS_QUEUE_NAME = "SQSQueueA11";
 
 //    @Value("${domain}")
     String DOMAIN = "prod.mengchen-gao.me" ;
