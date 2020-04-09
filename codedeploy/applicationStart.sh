@@ -17,4 +17,4 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
 
 sudo systemctl restart amazon-cloudwatch-agent
 
-java -Djavax.net.ssl.trustStore=/home/clientkeystore.jks -Djavax.net.ssl.trustStorePassword=woshengri -jar /home/webapp.jar > /dev/csye6225.log 2> /dev/csye6225.log < /dev/csye6225.log &
+java -jar /home/webapp.jar > /dev/csye6225.log 2> /dev/csye6225.log < /dev/csye6225.log &
