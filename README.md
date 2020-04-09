@@ -59,9 +59,11 @@ circleCi demo
                               --private-key file://Pr***Key.pem
                               --profile p***
 
+  ```
 
-   -------------------------------
-   other: 
+4. another way: 
+   
+   ```shell script
    1. set IAM for certificate
    aws iam upload-server-certificate \
        --server-certificate-name ch***ame \
@@ -74,5 +76,5 @@ circleCi demo
      --server-certificate-name ch***me \
      --profile p***
     
-  
+
      ```
