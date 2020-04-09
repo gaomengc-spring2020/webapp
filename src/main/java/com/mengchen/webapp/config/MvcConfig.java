@@ -31,7 +31,7 @@ public class MvcConfig {
 
     @Bean
     public DataSource securityDataSource() {
-
+//
 //        System.setProperty("javax.net.ssl.trustStore","/home/clientkeystore.jks");
 //        System.setProperty("javax.net.ssl.trustStorePassword", "woshengri");
 
