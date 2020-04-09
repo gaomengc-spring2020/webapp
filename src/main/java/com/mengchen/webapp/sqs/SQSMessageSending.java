@@ -28,7 +28,7 @@ public class SQSMessageSending {
         msg_atrr.put("Due_in" , new MessageAttributeValue().withDataType("String").withStringValue(String.valueOf(due_in)));
 
         List<String> billUrls = new ArrayList<>();
-        theBills.forEach(bill -> billUrls.add("http://" + DOMAIN + "/v1/bill/" + bill.getBill_id()));
+        theBills.forEach(bill -> billUrls.add("https://" + DOMAIN + "/v1/bill/" + bill.getBill_id()));
 
         SendMessageRequest send_msg_request = new SendMessageRequest()
                 .withQueueUrl(AWS_SQS_QUEUE_URL)
