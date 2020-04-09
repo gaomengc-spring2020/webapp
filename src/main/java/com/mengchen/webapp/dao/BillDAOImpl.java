@@ -155,7 +155,9 @@ public class BillDAOImpl implements BillDAO{
             LocalDate now = LocalDate.now();
             LocalDate dueDate = LocalDate.parse(bill.getDue_date());
 
-            if(ChronoUnit.DAYS.between(dueDate,now) <= due_in){
+            long gap = ChronoUnit.DAYS.between(dueDate,now);
+
+            if((gap <= due_in) && (gap >= 0 ) ){
                 dueBills.add(bill);
             }
         });
