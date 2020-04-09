@@ -6,6 +6,8 @@
       destination: /home/
     - source: ./cloudwatch-config.json
       destination: /opt/
+    - source: ./clientkeystore
+      destination: /home/
   hooks:
     AfterInstall:
       - location: ./codedeploy/afterInstall.sh
