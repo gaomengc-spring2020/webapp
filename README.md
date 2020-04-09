@@ -63,10 +63,13 @@ circleCi demo
    aws iam get-server-certificate \
      --server-certificate-name ch***me \
      --profile p***
-    ```
     
-    6. import to ACM
+     6. import to ACM
     
      aws acm import-certificate --certificate file://Ce***te.pem
                                  --certificate-chain file://Cer***Chain.pem
                                  --private-key file://Pr***Key.pem
+                                 --profile p***
+   
+                                 
+     ```
