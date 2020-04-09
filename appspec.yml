@@ -6,7 +6,7 @@
       destination: /home/
     - source: ./cloudwatch-config.json
       destination: /opt/
-    - source: ./clientkeystore
+    - source: ./clientkeystore.jks
       destination: /home/
   hooks:
     AfterInstall:
